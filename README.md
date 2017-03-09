@@ -1,5 +1,5 @@
-# FacilityBooking - A client-server application for managing bookings
-## Requirements
+# FacilityBooking - A client-server application for managing bookings #
+## Requirements ##
 * (C)ommunication
     * The application must implement UDP communication protocol (C1)
     * The application must transmit the data in byte stream (C2)
@@ -14,7 +14,7 @@
     * The server must return a confirmation ID to user upon completing the booking request (O2b)
     * The user must be able to edit an existing booking by the confirmation ID & time offset (either -1||+0.5 hours) (O3a)
     * The server must return a confirmation message to user upon completing the edit request (O3b)
-    * The user must be able to receive update (monitor) on a facility during a specified period by the facility's name & start-end time (O4a)
+    * The user must be able to receive upTime (monitor) on a facility during a specified period by the facility's name & start-end time (O4a)
     * The user must not send any other request upon sending the request to monitor a facility (as mentioned above) (O4b)
     * The application must implements another 2 addons operations, of which one is idempotent, the other is non-idempotent (to be discussed) (O5)
 * (D)atabase
@@ -22,40 +22,44 @@
     * The application must store all bookings requested by clients (D2)
     * The application must store all clients who send monitoring requests (D3a)
     * The application must remove all clients whose monitoring requests got timeout (D3b)
-## Proposed Design
+## Proposed Design ##
 Each headings below correspond to a package within the Java project.
-### Server
+### Server ###
 Classes to be run on server-side
-* DOW (Days of Week) (*)
+* DayOfWeek (*)
     * Attributes: DOW.MONDAY -&gt; DOW.SUNDAY
     * Methods:
+* Time
+    * Attributes: int hour, int minute, int value
 * Facility (*)
+    * Attributes: HashMap&lt;DOW, List&lt;Booking&gt;&gt; timetable, String name
     * static Facility getFacilityByName(String facilityName)
+* Booking
+    * Attributes: long confirmationID, Time start, Time end
 * QueryService
     * Attributes: List&lt;Facility&gt; facilities, List&lt;Booking&gt; booking
     * Methods
-        * void getAvailableFacilityByDay(DOW day)
-        * void getAvailableFacilityByName(String facilityName)
+        * List&lt;Facility&gt; getAllFacility()
         * void getAvailableFacilityByName(String facilityName, DOW day)
-        * long getConfirmationID(String facilityName, Date start, Date end)
+        * long getConfirmationID(String facilityName, Time start, Time end)
         * boolean editBookedConfirmation(long confirmationID, int minutes)
-* InterestedSlot: (*)
-    * Attributes: Facility
+* MonitoredSlot: (*)
+    * Attributes: String clientIP, String facilityName, Time start, Time end
     * Methods:
+        * static List&lt;MonitoredSlot&gt; getSlotMonitoredByFacility(String facilityName)
 * MonitorService
-    * Attributes: MonitoringClient
+    * Attributes: List&lt;MonitoredSLot&gt; client
     * Methods
-        * registerClient(String ipAddr, int port, String facilityName, Date start, Date end)
-        * List&lt;Client&gt; getInterestedClient(Facility facility, Date start, Date end)
+        * registerClient(String ipAddr, int port, String facilityName, Time start, Time end)
 * Main
     * Communication Protocol
-        * {Client IP Address}|{Message Increment}|{Action}|{Parameter lists}
-### Client
+        * {Client IP Address}|{Message Increment}|{Operation}|{Parameter lists}
+### Client ###
 Classes to be run on client-side
-### Shared
+### Shared ###
 Classes to be shared between server & client
 * **NOTE**: (*) indicated incompleted class description
-## Work Breakdown
+## Work Breakdown ##
 * Nhat
     * Implement the communication protocol (C1)
     * Implement the server thread to listen for requests from client (C2)
