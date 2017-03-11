@@ -1,31 +1,50 @@
 package server;
 
 import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * TODO: Describe purpose and behavior of Booking
  */
 public class Booking {
-    private long confirmationID;
+
+    private int confirmationID;
     private Time start;
     private Time end;
 
-    private Booking(long confirmationID, Time start, Time end) {
+    private static HashMap<Integer, Facility> index = new HashMap<>();
+
+    private Booking(int confirmationID, Time start, Time end) {
         this.start = start;
         this.end = end;
         this.confirmationID = confirmationID;
     }
 
-    public static Booking placeBooking(Time start, Time end) {
+    public static Booking placeBooking(int confirmationID, Time start, Time end) {
         if (start.compareTo(end) > 0) {
             return null;
         }
-        int confirmationID = (int) System.currentTimeMillis() >> 16;
         return new Booking(confirmationID, start, end);
     }
 
-    public long getConfirmationID() {
-        return this.confirmationID;
+    public static void setConfirmationToFacility(int confirmationID, Facility facility) {
+        index.put(confirmationID, facility);
+    }
+
+    public static Facility getFacilityBookedByID(int confirmationID) {
+        return index.get(confirmationID);
+    }
+
+    public boolean isConfirmationIDEqual(int confirmationID) {
+        return this.confirmationID == confirmationID;
+    }
+
+    public void setStartTime(Time start) {
+        this.start = start;
+    }
+
+    public void setEndTime(Time end) {
+        this.end = end;
     }
 
     public Time getStartTime() {
@@ -41,9 +60,14 @@ public class Booking {
         Time end = booking.getEndTime();
         if (this.start.compareTo(start) < 0 && this.end.compareTo(start) < 0
                 || this.start.compareTo(end) > 0 && this.end.compareTo(end) > 0) {
-            return true;
+            return false;
         }
-        return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append(start).append(" -> ").append(end).toString();
     }
 
     static class BookingComparator implements Comparator<Booking> {

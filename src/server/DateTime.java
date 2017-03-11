@@ -12,7 +12,7 @@ public class DateTime {
         this.time = Time.getTime(hour, minute);
     }
 
-    public static DateTime getTime(int day, int hour, int minute) {
+    public static DateTime getDateTime(int day, int hour, int minute) {
         if (day < 0 || day > 6 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
             return null;
         }
@@ -27,11 +27,16 @@ public class DateTime {
         return this.time;
     }
 
-    public int compareTo(DateTime time2) {
-        int dayDiff = this.day.compareTo(time2.day);
+    public int compareTo(DateTime dateTime) {
+        int dayDiff = this.day.compareTo(dateTime.day);
         if (dayDiff != 0) {
             return dayDiff;
         }
-        return this.time.compareTo(time2.time);
+        return this.time.compareTo(dateTime.time);
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append(day).append(" ").append(time).toString();
     }
 }

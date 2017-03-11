@@ -34,11 +34,20 @@ public class Facility {
         return this.timetable;
     }
 
-    public static void addFacility(String name) {
+    public static boolean addFacility(String name) {
+        if (index.containsKey(name)) {
+            return false;
+        }
         index.put(name, new Facility(name));
+        return true;
     }
 
     public static Facility getFacilityByName(String name) {
         return index.get(name);
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("Facility Name: ").append(name).toString();
     }
 }

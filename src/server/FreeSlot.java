@@ -28,4 +28,9 @@ public class FreeSlot {
         return this.end;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder().append(start).append(" -> ").append(end).toString();
+    }
+
 }
