@@ -5,10 +5,10 @@ package server;
  */
 public class FreeSlot {
 
-    private Time start;
-    private Time end;
+    protected Time start;
+    protected Time end;
 
-    private FreeSlot(Time start, Time end) {
+    protected FreeSlot(Time start, Time end) {
         this.start = start;
         this.end = end;
     }
@@ -26,6 +26,16 @@ public class FreeSlot {
 
     public Time getEnd() {
         return this.end;
+    }
+
+    public boolean isClashed(FreeSlot freeSlot) {
+        Time start = freeSlot.start;
+        Time end = freeSlot.end;
+        if (this.start.compareTo(start) < 0 && this.end.compareTo(start) < 0
+                || this.start.compareTo(end) > 0 && this.end.compareTo(end) > 0) {
+            return false;
+        }
+        return true;
     }
 
     @Override

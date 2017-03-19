@@ -30,11 +30,11 @@ public class Facility {
         return this.name;
     }
 
-    public HashMap<DayOfWeek, List<Booking>> getTimetable() {
-        return this.timetable;
+    protected List<Booking> getTimetableOn(DayOfWeek day) {
+        return this.timetable.get(day);
     }
 
-    public static boolean addFacility(String name) {
+    protected static boolean addFacility(String name) {
         if (index.containsKey(name)) {
             return false;
         }
@@ -42,7 +42,7 @@ public class Facility {
         return true;
     }
 
-    public static Facility getFacilityByName(String name) {
+    protected static Facility getFacilityByName(String name) {
         return index.get(name);
     }
 

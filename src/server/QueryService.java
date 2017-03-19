@@ -2,7 +2,6 @@ package server;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -34,9 +33,8 @@ public class QueryService {
 
     public static List<FreeSlot> getAvailableFacility(String name, DayOfWeek day) {
         Facility facility = Facility.getFacilityByName(name);
-        HashMap<DayOfWeek, List<Booking>> timetable = facility.getTimetable();
         // get list of bookings for the facility in the day & initialize an empty list of free slots
-        List<Booking> booked = timetable.get(day);
+        List<Booking> booked = facility.getTimetableOn(day);
         List<FreeSlot> slots = new ArrayList<>();
         if (booked.isEmpty()) {
             // if there's no booking, indicate a free slot as the whole day
@@ -68,7 +66,6 @@ public class QueryService {
         DayOfWeek startDay = start.getDay();
         DayOfWeek endDay = end.getDay();
         Facility facility = Facility.getFacilityByName(name);
-        HashMap<DayOfWeek, List<Booking>> timetable = facility.getTimetable();
         if (startDay.compareTo(endDay) == -1) {
             // if the booking spans multiple days, add the booking for start day and end day first
             Booking bS = Booking.placeBooking(confirmationID, start.getTime(), Time.END_OF_DAY);
@@ -76,8 +73,8 @@ public class QueryService {
             if (bS == null || bE == null) {
                 confirmationID = -1;
             } else {
-                List<Booking> bookingsStart = timetable.get(startDay);
-                List<Booking> bookingsEnd = timetable.get(endDay);
+                List<Booking> bookingsStart = facility.getTimetableOn(startDay);
+                List<Booking> bookingsEnd = facility.getTimetableOn(endDay);
                 if (isClashed(bS, bookingsStart) || isClashed(bE, bookingsEnd)) {
                     confirmationID = -1;
                 } else {
@@ -86,7 +83,7 @@ public class QueryService {
                     boolean free = true;
                     List<List<Booking>> bookingsInbetween = new ArrayList<>();
                     for (DayOfWeek day : inbetween) {
-                        List<Booking> bookingsToday = timetable.get(day);
+                        List<Booking> bookingsToday = facility.getTimetableOn(day);
                         if (!bookingsToday.isEmpty()) {
                             // if any of the in-between days have booking, cancel the booking
                             free = false;
@@ -113,7 +110,7 @@ public class QueryService {
             if (b == null) {
                 confirmationID = -1;
             } else {
-                List<Booking> bookings = timetable.get(startDay);
+                List<Booking> bookings = facility.getTimetableOn(startDay);
                 if (isClashed(b, bookings)) {
                     confirmationID = -1;
                 } else {
@@ -139,13 +136,12 @@ public class QueryService {
         // set mode to either postpone or advance
         BookingEditMode editMode = minute > 0 ? BookingEditMode.POSTPONE : BookingEditMode.ADVANCE;
         Facility facility = Booking.getFacilityBookedByID(confirmationID);
-        HashMap<DayOfWeek, List<Booking>> timetable = facility.getTimetable();
         // get all bookings with the same confirmationID as the parameter
         List<Booking> returnBookings = new ArrayList<>();
         // record the startDay of the group of bookings
         DayOfWeek startDay = null;
         for (DayOfWeek day : DayOfWeek.values()) {
-            List<Booking> bookings = timetable.get(day);
+            List<Booking> bookings = facility.getTimetableOn(day);
             for (Booking booking : bookings) {
                 if (booking.isConfirmationIDEqual(confirmationID)) {
                     returnBookings.add(booking);
@@ -166,7 +162,7 @@ public class QueryService {
             Booking singleBooking = returnBookings.get(0);
             Time startTime = singleBooking.getStartTime();
             Time endTime = singleBooking.getEndTime();
-            List<Booking> todayBookings = timetable.get(startDay);
+            List<Booking> todayBookings = facility.getTimetableOn(startDay);
             if (editMode == BookingEditMode.ADVANCE) {
                 DayOfWeek yesterday = startDay.getOffsetDay(-1);
                 // handling advance mode
@@ -178,7 +174,7 @@ public class QueryService {
                 if (yesterday == null) {
                     return false;
                 }
-                List<Booking> yesterdayBookings = timetable.get(yesterday);
+                List<Booking> yesterdayBookings = facility.getTimetableOn(yesterday);
                 Time newStart = startTime;
                 Time newEnd = endTime;
                 if (endTime.getTotalMinutes() < Math.abs(minute)) {
@@ -210,7 +206,7 @@ public class QueryService {
                 if (tomorrow == null) {
                     return false;
                 }
-                List<Booking> tomorrowBookings = timetable.get(tomorrow);
+                List<Booking> tomorrowBookings = facility.getTimetableOn(tomorrow);
                 Time newStart = startTime;
                 Time newEnd = endTime;
                 if (startTime.getTotalMinutes() + minute >= Time.MINUTES_PER_DAY) {
@@ -239,9 +235,9 @@ public class QueryService {
             Time startTime = firstBooking.getStartTime();
             // get only last booking end time since start time must be start of day
             Time endTime = lastBooking.getEndTime();
-            List<Booking> startBookings = timetable.get(startDay);
+            List<Booking> startBookings = facility.getTimetableOn(startDay);
             DayOfWeek endDay = startDay.getOffsetDay(size);
-            List<Booking> endBookings = timetable.get(endDay);
+            List<Booking> endBookings = facility.getTimetableOn(endDay);
             if (editMode == BookingEditMode.ADVANCE) {
                 // handling advance mode
                 if (startTime.getTotalMinutes() < Math.abs(minute)) {
@@ -250,7 +246,7 @@ public class QueryService {
                     if (startYesterday == null) {
                         return false;
                     }
-                    List<Booking> startYesterdayBookings = timetable.get(startYesterday);
+                    List<Booking> startYesterdayBookings = facility.getTimetableOn(startYesterday);
                     firstBooking.setStartTime(Time.START_OF_DAY);
                     Booking newBooking = Booking.placeBooking(confirmationID, startTime.addOffset(minute),
                             Time.END_OF_DAY);
@@ -284,7 +280,7 @@ public class QueryService {
                     if (endTomorrow == null) {
                         return false;
                     }
-                    List<Booking> endTomorrowBookings = timetable.get(endTomorrow);
+                    List<Booking> endTomorrowBookings = facility.getTimetableOn(endTomorrow);
                     lastBooking.setEndTime(Time.END_OF_DAY);
                     Booking newBooking = Booking.placeBooking(confirmationID, Time.START_OF_DAY,
                             endTime.addOffset(minute));

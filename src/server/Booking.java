@@ -6,32 +6,29 @@ import java.util.HashMap;
 /**
  * TODO: Describe purpose and behavior of Booking
  */
-public class Booking {
+public class Booking extends FreeSlot {
 
     private int confirmationID;
-    private Time start;
-    private Time end;
 
     private static HashMap<Integer, Facility> index = new HashMap<>();
 
     private Booking(int confirmationID, Time start, Time end) {
-        this.start = start;
-        this.end = end;
+        super(start, end);
         this.confirmationID = confirmationID;
     }
 
-    public static Booking placeBooking(int confirmationID, Time start, Time end) {
+    protected static Booking placeBooking(int confirmationID, Time start, Time end) {
         if (start.compareTo(end) > 0) {
             return null;
         }
         return new Booking(confirmationID, start, end);
     }
 
-    public static void setConfirmationToFacility(int confirmationID, Facility facility) {
+    protected static void setConfirmationToFacility(int confirmationID, Facility facility) {
         index.put(confirmationID, facility);
     }
 
-    public static Facility getFacilityBookedByID(int confirmationID) {
+    protected static Facility getFacilityBookedByID(int confirmationID) {
         return index.get(confirmationID);
     }
 
@@ -39,11 +36,11 @@ public class Booking {
         return this.confirmationID == confirmationID;
     }
 
-    public void setStartTime(Time start) {
+    protected void setStartTime(Time start) {
         this.start = start;
     }
 
-    public void setEndTime(Time end) {
+    protected void setEndTime(Time end) {
         this.end = end;
     }
 
@@ -55,22 +52,7 @@ public class Booking {
         return this.end;
     }
 
-    public boolean isClashed(Booking booking) {
-        Time start = booking.getStartTime();
-        Time end = booking.getEndTime();
-        if (this.start.compareTo(start) < 0 && this.end.compareTo(start) < 0
-                || this.start.compareTo(end) > 0 && this.end.compareTo(end) > 0) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder().append(start).append(" -> ").append(end).toString();
-    }
-
-    static class BookingComparator implements Comparator<Booking> {
+    protected static class BookingComparator implements Comparator<Booking> {
 
         @Override
         public int compare(Booking o1, Booking o2) {
