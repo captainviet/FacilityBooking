@@ -3,7 +3,7 @@ package server;
 /**
  * TODO: Describe purpose and behavior of Time
  */
-public class DateTime {
+public class DateTime implements Comparable<DateTime>{
     private DayOfWeek day;
     private Time time;
 

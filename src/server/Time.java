@@ -3,7 +3,7 @@ package server;
 /**
  * TODO: Describe purpose and behavior of Time
  */
-public class Time {
+public class Time implements Comparable<Time>{
 
     public static final Time END_OF_DAY = new Time(23, 59);
     public static final Time START_OF_DAY = new Time(0, 0);

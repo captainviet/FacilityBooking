@@ -83,9 +83,21 @@ Classes to be run on server-side
         - `public static boolean editBookedConfirmation(int confirmationID, int minute)`: advance or postpone the booking identified by the *confirmationID* by *minute* offset (limited by -60 <= minute <= 30), returning true if operation succeeds, false otherwise
 - **`MonitorService`** (to be discussed)
     - Attributes:
-        - `List&lt;MonitoredSLot&gt; client`
+        - `List<ClientMonitor> clients`
     - Methods
-        - `public static boolean registerClient(String ipAddr, int port, String facilityName, Time start, Time end)`: register a client with interest in the specified facility within the specified time range, returning true if operation succeeds, false otherwise
+        - `public static boolean registerClient(String ipAddr, int port, String facilityName, DateTime start, DateTime end)`: register a client with interest in the specified facility within the specified time range, returning true if operation succeeds, false otherwise
+        - `public static void deregisterClient(ClientMonitor client)`: deregister a client when the monitoring interval ends
+        - `public static void updateClients(String facility_name)`: update all the clients who are monitoring the facility, deregister the clients whose monitoring interval ended.
+- **`ClientMonitor`** 
+    - Attributes:
+        - String ip
+        - int port
+        - String facility_name
+        - DateTime monitor_start
+        - DateTime monitor_end
+    - Methods
+        - `public void ClientMonitor(String ip, int port, String facility_name, DateTime monitor_start, DateTime monitor_end)`: add a new client who has requested monitoring a facility 
+       
 - **`Server`**
     - Communication Protocol
         - `<Client IP Address>|<Message Increment>|<Operation>|<Parameter lists>`
