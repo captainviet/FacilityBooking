@@ -4,18 +4,18 @@ package server;
 import java.util.ArrayList;
 
 public class MonitoringService {
-    private ArrayList<ClientMonitor> clients;
+    private static ArrayList<ClientMonitor> clients = new ArrayList<>();
 
     public MonitoringService() {
-        this.clients = new ArrayList<>();
+
     }
 
-    public boolean registerClient(ClientMonitor client){
-        this.clients.add(client);
+    public static boolean registerClient(ClientMonitor client){
+        clients.add(client);
         return true;
     }
 
-    public void updateClients(String facility_name, DateTime now){
+    public static void updateClients(String facility_name, DateTime now){
         ArrayList<ClientMonitor> deregister = new ArrayList<>();
         for (ClientMonitor client : clients){
             if (client.getMonitor_start().compareTo(now) <= 0
@@ -33,7 +33,7 @@ public class MonitoringService {
         }
     }
 
-    public void deregisterClient(ClientMonitor client){
+    private static void deregisterClient(ClientMonitor client){
         clients.remove(client);
     }
 }
