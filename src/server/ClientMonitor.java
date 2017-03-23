@@ -4,9 +4,9 @@ package server;
 public class ClientMonitor {
     private String ip;
     private int port;
-    private String facility_name;
-    private DateTime monitor_start;
-    private DateTime monitor_end;
+    private String facilityName;
+    private DateTime monitorStart;
+    private DateTime monitorEnd;
 
     public String getIp() {
         return ip;
@@ -24,36 +24,36 @@ public class ClientMonitor {
         this.port = port;
     }
 
-    public String getFacility_name() {
-        return facility_name;
+    public String getFacilityName() {
+        return facilityName;
     }
 
-    public void setFacility_name(String facility_name) {
-        this.facility_name = facility_name;
+    public void setFacilityName(String facilityName) {
+        this.facilityName = facilityName;
     }
 
-    public DateTime getMonitor_start() {
-        return monitor_start;
+    public DateTime getMonitorStart() {
+        return monitorStart;
     }
 
-    public void setMonitor_start(DateTime monitor_start) {
-        this.monitor_start = monitor_start;
+    public void setMonitorStart(DateTime monitorStart) {
+        this.monitorStart = monitorStart;
     }
 
-    public DateTime getMonitor_end() {
-        return monitor_end;
+    public DateTime getMonitorEnd() {
+        return monitorEnd;
     }
 
-    public void setMonitor_end(DateTime monitor_end) {
-        this.monitor_end = monitor_end;
+    public void setMonitorEnd(DateTime monitorEnd) {
+        this.monitorEnd = monitorEnd;
     }
 
-    public ClientMonitor(String ip, int port, String facility_name, DateTime monitor_start, DateTime monitor_end) {
+    public ClientMonitor(String ip, int port, String facilityName, DateTime monitorStart, DateTime monitorEnd) {
         this.ip = ip;
         this.port = port;
-        this.facility_name = facility_name;
-        this.monitor_start = monitor_start;
-        this.monitor_end = monitor_end;
+        this.facilityName = facilityName;
+        this.monitorStart = monitorStart;
+        this.monitorEnd = monitorEnd;
     }
 
 }

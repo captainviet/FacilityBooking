@@ -87,16 +87,16 @@ Classes to be run on server-side
     - Methods
         - `public static boolean registerClient(String ipAddr, int port, String facilityName, DateTime start, DateTime end)`: register a client with interest in the specified facility within the specified time range, returning true if operation succeeds, false otherwise
         - `public static void deregisterClient(ClientMonitor client)`: deregister a client when the monitoring interval ends
-        - `public static void updateClients(String facility_name)`: update all the clients who are monitoring the facility, deregister the clients whose monitoring interval ended.
+        - `public static void updateClients(String facilityName)`: update all the clients who are monitoring the facility, deregister the clients whose monitoring interval ended.
 - **`ClientMonitor`** 
     - Attributes:
         - String ip
         - int port
-        - String facility_name
-        - DateTime monitor_start
-        - DateTime monitor_end
+        - String facilityName
+        - DateTime monitorStart
+        - DateTime monitorEnd
     - Methods
-        - `public void ClientMonitor(String ip, int port, String facility_name, DateTime monitor_start, DateTime monitor_end)`: add a new client who has requested monitoring a facility 
+        - `public void ClientMonitor(String ip, int port, String facilityName, DateTime monitorStart, DateTime monitorEnd)`: add a new client who has requested monitoring a facility 
        
 - **`Server`**
     - Communication Protocol

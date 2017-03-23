@@ -15,12 +15,12 @@ public class MonitoringService {
         return true;
     }
 
-    public static void updateClients(String facility_name, DateTime now){
+    public static void updateClients(String facilityName, DateTime now){
         ArrayList<ClientMonitor> deregister = new ArrayList<>();
         for (ClientMonitor client : clients){
-            if (client.getMonitor_start().compareTo(now) <= 0
-                    && client.getMonitor_end().compareTo(now) >= 0){
-                if (client.getFacility_name().equals(facility_name)){
+            if (client.getMonitorStart().compareTo(now) <= 0
+                    && client.getMonitorEnd().compareTo(now) >= 0){
+                if (client.getFacilityName().equals(facilityName)){
                     // send update to the clients
                 }
             }
