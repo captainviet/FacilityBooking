@@ -1,9 +1,9 @@
-package server;
+package shared;
 
 /**
  * TODO: Describe purpose and behavior of Time
  */
-public class Time implements Comparable<Time>{
+public class Time implements Comparable<Time> {
 
     public static final Time END_OF_DAY = new Time(23, 59);
     public static final Time START_OF_DAY = new Time(0, 0);
@@ -19,11 +19,24 @@ public class Time implements Comparable<Time>{
         this.totalMinutes = hour * 60 + minute;
     }
 
+    private Time(int totalMinutes) {
+        this.hour = totalMinutes / 60;
+        this.minute = totalMinutes % 60;
+        this.totalMinutes = totalMinutes;
+    }
+
     public static Time getTime(int hour, int minute) {
         if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
             return null;
         }
         return new Time(hour, minute);
+    }
+
+    public static Time getTimeByTotal(int totalMinutes) {
+        if (totalMinutes < 0 || totalMinutes >= MINUTES_PER_DAY) {
+            return null;
+        }
+        return new Time(totalMinutes);
     }
 
     public int getHour() {
@@ -43,6 +56,7 @@ public class Time implements Comparable<Time>{
         return getTime(newMinutes / 60, newMinutes % 60);
     }
 
+    @Override
     public int compareTo(Time time) {
         if (this.totalMinutes == time.totalMinutes) {
             return 0;

@@ -1,4 +1,4 @@
-package server;
+package shared;
 
 /**
  * TODO: Describe purpose and behavior of FreeSlot
@@ -40,7 +40,7 @@ public class FreeSlot {
 
     @Override
     public String toString() {
-        return new StringBuilder().append(start).append(" -> ").append(end).toString();
+        return new StringBuilder().append(start).append(" ").append(end).toString();
     }
 
 }
