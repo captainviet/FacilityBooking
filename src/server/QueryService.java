@@ -317,32 +317,31 @@ public class QueryService {
         return true;
     }
 
-    public static boolean cancelBookedConfirmation(int confirmationID){
+    public static boolean cancelBookedConfirmation(int confirmationID) {
         if (Booking.checkBookingExists(confirmationID)) {
             Facility facility = Booking.getFacilityBookedByID(confirmationID);
             // get all bookings with the same confirmationID as the parameter
-            Booking toBeCanceled = null;
-            boolean found = false;
             for (DayOfWeek day : DayOfWeek.values()) {
+                Booking toBeCanceled = null;
                 List<Booking> bookings = facility.getTimetableOn(day);
                 for (Booking booking : bookings) {
                     if (booking.isConfirmationIDEqual(confirmationID)) {
-                        found = true;
                         toBeCanceled = booking;
+                        break;
                     }
                 }
-                if (found) {
+                if (toBeCanceled != null) {
                     // remove in the facility's booking array
                     facility.cancelBooking(day, toBeCanceled);
-                    break;
                 }
             }
             // remove the booking from the Booking class
             Booking.removeBooking(confirmationID);
-            return found;
+            return true;
         }
         return false;
     }
+
     private static boolean isClashed(Booking booking, List<Booking> bookings) {
         for (Booking b : bookings) {
             if (booking.isClashed(b)) {
