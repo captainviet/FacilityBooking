@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import shared.DateTime;
+import shared.DayOfWeek;
+import shared.FreeSlot;
+import shared.Time;
+
 /**
  * TODO: Describe purpose and behavior of QueryService
  */

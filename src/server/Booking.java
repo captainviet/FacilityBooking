@@ -3,6 +3,9 @@ package server;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import shared.FreeSlot;
+import shared.Time;
+
 /**
  * TODO: Describe purpose and behavior of Booking
  */
@@ -61,6 +64,5 @@ public class Booking extends FreeSlot {
             Time start2 = o2.getStartTime();
             return start1.compareTo(start2);
         }
-
     }
 }

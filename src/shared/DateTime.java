@@ -1,22 +1,22 @@
-package server;
+package shared;
 
 /**
  * TODO: Describe purpose and behavior of Time
  */
-public class DateTime implements Comparable<DateTime>{
+public class DateTime implements Comparable<DateTime> {
     private DayOfWeek day;
     private Time time;
 
-    private DateTime(int day, int hour, int minute) {
-        this.day = DayOfWeek.valueOf(day);
-        this.time = Time.getTime(hour, minute);
+    private DateTime(DayOfWeek day, int totalMinutes) {
+        this.day = day;
+        this.time = Time.getTimeByTotal(totalMinutes);
     }
 
-    public static DateTime getDateTime(int day, int hour, int minute) {
-        if (day < 0 || day > 6 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    public static DateTime getDateTime(DayOfWeek day, int totalMinutes) {
+        if (totalMinutes < 0 || totalMinutes >= Time.MINUTES_PER_DAY) {
             return null;
         }
-        return new DateTime(day, hour, minute);
+        return new DateTime(day, totalMinutes);
     }
 
     public DayOfWeek getDay() {
@@ -27,6 +27,7 @@ public class DateTime implements Comparable<DateTime>{
         return this.time;
     }
 
+    @Override
     public int compareTo(DateTime dateTime) {
         int dayDiff = this.day.compareTo(dateTime.day);
         if (dayDiff != 0) {

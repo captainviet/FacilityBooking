@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import shared.DayOfWeek;
+
 /**
  * TODO: Describe purpose and behavior of Facility
  */

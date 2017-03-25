@@ -1,39 +1,38 @@
 package server;
 
-
 import java.util.ArrayList;
+
+import shared.DateTime;
 
 public class MonitoringService {
     private static ArrayList<ClientMonitor> clients = new ArrayList<>();
 
-    public MonitoringService() {
+    private MonitoringService() {
 
     }
 
-    public static boolean registerClient(ClientMonitor client){
+    public static boolean registerClient(ClientMonitor client) {
         clients.add(client);
         return true;
     }
 
-    public static void updateClients(String facilityName, DateTime now){
+    public static void updateClients(String facilityName, DateTime now) {
         ArrayList<ClientMonitor> deregister = new ArrayList<>();
-        for (ClientMonitor client : clients){
-            if (client.getMonitorStart().compareTo(now) <= 0
-                    && client.getMonitorEnd().compareTo(now) >= 0){
-                if (client.getFacilityName().equals(facilityName)){
+        for (ClientMonitor client : clients) {
+            if (client.getMonitorStart().compareTo(now) <= 0 && client.getMonitorEnd().compareTo(now) >= 0) {
+                if (client.getFacilityName().equals(facilityName)) {
                     // send update to the clients
                 }
-            }
-            else {
+            } else {
                 deregister.add(client);
             }
         }
-        for (ClientMonitor client : deregister){
+        for (ClientMonitor client : deregister) {
             deregisterClient(client);
         }
     }
 
-    private static void deregisterClient(ClientMonitor client){
+    private static void deregisterClient(ClientMonitor client) {
         clients.remove(client);
     }
 }
