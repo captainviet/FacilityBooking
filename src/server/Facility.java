@@ -26,6 +26,7 @@ public class Facility {
 
     private Facility(String name) {
         this.name = name;
+        addFacility(name);
     }
 
     public String getFacilityName() {
@@ -34,6 +35,14 @@ public class Facility {
 
     protected List<Booking> getTimetableOn(DayOfWeek day) {
         return this.timetable.get(day);
+    }
+
+    protected boolean cancelBooking(DayOfWeek day, Booking booking){
+        if (timetable.get(day).contains(booking)){
+            this.timetable.get(day).remove(booking);
+            return true;
+        }
+        return false;
     }
 
     protected static boolean addFacility(String name) {

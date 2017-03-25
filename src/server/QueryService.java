@@ -1,8 +1,6 @@
 package server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import shared.DateTime;
 import shared.DayOfWeek;
@@ -64,6 +62,23 @@ public class QueryService {
             }
         }
         return slots;
+    }
+
+    public static Map<Facility, List<FreeSlot>> getAllAvailableFacility() {
+        List<Facility> facilities = getAllFacility();
+        Map<Facility, List<FreeSlot>> facilitySlots = new HashMap<>();
+
+        for (Facility facility: facilities)
+        {
+            List<FreeSlot> slots = new ArrayList<>();
+            for (DayOfWeek day : DayOfWeek.values())
+            {
+                slots.addAll(getAvailableFacility(facility.getFacilityName(), day));
+            }
+            facilitySlots.put(facility, slots);
+        }
+
+        return facilitySlots;
     }
 
     public static long getConfirmationID(String name, DateTime start, DateTime end) {
@@ -302,6 +317,27 @@ public class QueryService {
         return true;
     }
 
+    public static boolean cancelBookedConfirmation(int confirmationID){
+        Facility facility = Booking.getFacilityBookedByID(confirmationID);
+        // get all bookings with the same confirmationID as the parameter
+        Booking toBeCanceled = null;
+        boolean found = false;
+        for (DayOfWeek day : DayOfWeek.values()) {
+            List<Booking> bookings = facility.getTimetableOn(day);
+            for (Booking booking : bookings) {
+                if (booking.isConfirmationIDEqual(confirmationID)) {
+                    found = true;
+                    toBeCanceled = booking;
+                }
+            }
+            if (found) {
+                facility.cancelBooking(day, toBeCanceled);
+                break;
+            }
+        }
+
+        return found;
+    }
     private static boolean isClashed(Booking booking, List<Booking> bookings) {
         for (Booking b : bookings) {
             if (booking.isClashed(b)) {
