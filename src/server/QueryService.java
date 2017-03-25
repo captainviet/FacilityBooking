@@ -318,25 +318,30 @@ public class QueryService {
     }
 
     public static boolean cancelBookedConfirmation(int confirmationID){
-        Facility facility = Booking.getFacilityBookedByID(confirmationID);
-        // get all bookings with the same confirmationID as the parameter
-        Booking toBeCanceled = null;
-        boolean found = false;
-        for (DayOfWeek day : DayOfWeek.values()) {
-            List<Booking> bookings = facility.getTimetableOn(day);
-            for (Booking booking : bookings) {
-                if (booking.isConfirmationIDEqual(confirmationID)) {
-                    found = true;
-                    toBeCanceled = booking;
+        if (Booking.checkBookingExists(confirmationID)) {
+            Facility facility = Booking.getFacilityBookedByID(confirmationID);
+            // get all bookings with the same confirmationID as the parameter
+            Booking toBeCanceled = null;
+            boolean found = false;
+            for (DayOfWeek day : DayOfWeek.values()) {
+                List<Booking> bookings = facility.getTimetableOn(day);
+                for (Booking booking : bookings) {
+                    if (booking.isConfirmationIDEqual(confirmationID)) {
+                        found = true;
+                        toBeCanceled = booking;
+                    }
+                }
+                if (found) {
+                    // remove in the facility's booking array
+                    facility.cancelBooking(day, toBeCanceled);
+                    break;
                 }
             }
-            if (found) {
-                facility.cancelBooking(day, toBeCanceled);
-                break;
-            }
+            // remove the booking from the Booking class
+            Booking.removeBooking(confirmationID);
+            return found;
         }
-
-        return found;
+        return false;
     }
     private static boolean isClashed(Booking booking, List<Booking> bookings) {
         for (Booking b : bookings) {
