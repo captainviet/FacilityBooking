@@ -1,8 +1,6 @@
 package server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import shared.DateTime;
 import shared.DayOfWeek;
@@ -64,6 +62,23 @@ public class QueryService {
             }
         }
         return slots;
+    }
+
+    public static Map<Facility, List<FreeSlot>> getAllAvailableFacility() {
+        List<Facility> facilities = getAllFacility();
+        Map<Facility, List<FreeSlot>> facilitySlots = new HashMap<>();
+
+        for (Facility facility: facilities)
+        {
+            List<FreeSlot> slots = new ArrayList<>();
+            for (DayOfWeek day : DayOfWeek.values())
+            {
+                slots.addAll(getAvailableFacility(facility.getFacilityName(), day));
+            }
+            facilitySlots.put(facility, slots);
+        }
+
+        return facilitySlots;
     }
 
     public static long getConfirmationID(String name, DateTime start, DateTime end) {
@@ -300,6 +315,31 @@ public class QueryService {
             }
         }
         return true;
+    }
+
+    public static boolean cancelBookedConfirmation(int confirmationID) {
+        if (Booking.checkBookingExists(confirmationID)) {
+            Facility facility = Booking.getFacilityBookedByID(confirmationID);
+            // get all bookings with the same confirmationID as the parameter
+            for (DayOfWeek day : DayOfWeek.values()) {
+                Booking toBeCanceled = null;
+                List<Booking> bookings = facility.getTimetableOn(day);
+                for (Booking booking : bookings) {
+                    if (booking.isConfirmationIDEqual(confirmationID)) {
+                        toBeCanceled = booking;
+                        break;
+                    }
+                }
+                if (toBeCanceled != null) {
+                    // remove in the facility's booking array
+                    facility.cancelBooking(day, toBeCanceled);
+                }
+            }
+            // remove the booking from the Booking class
+            Booking.removeBooking(confirmationID);
+            return true;
+        }
+        return false;
     }
 
     private static boolean isClashed(Booking booking, List<Booking> bookings) {
