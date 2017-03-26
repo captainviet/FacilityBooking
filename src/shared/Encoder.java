@@ -1,4 +1,4 @@
-package server;
+package shared;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -19,13 +19,13 @@ public class Encoder {
 
     }
 
-    protected static String fromDateTimeToString(DateTime dateTime) {
+    public static String fromDateTimeToString(DateTime dateTime) {
         StringBuilder str = new StringBuilder().append(dateTime.getDay()).append(" ")
                 .append(fromTimeToString(dateTime.getTime()));
         return str.toString();
     }
 
-    protected static DateTime fromStringToDateTime(String str) {
+    public static DateTime fromStringToDateTime(String str) {
         scanner = new Scanner(str);
         DateTime dateTime;
         try {
@@ -42,7 +42,7 @@ public class Encoder {
         return dateTime;
     }
 
-    protected static String fromFreeSlotToString(FreeSlot freeSlot) {
+    public static String fromFreeSlotToString(FreeSlot freeSlot) {
         StringBuilder str = new StringBuilder().append(fromTimeToString(freeSlot.getStart())).append(" ")
                 .append(fromTimeToString(freeSlot.getEnd()));
         return str.toString();
@@ -62,8 +62,8 @@ public class Encoder {
         return freeSlot;
     }
 
-    protected static String fromTimeToString(Time time) {
-        StringBuilder str = new StringBuilder().append(time.getTotalMinutes()).append(" ");
+    public static String fromTimeToString(Time time) {
+        StringBuilder str = new StringBuilder().append(time.getTotalMinutes());
         return str.toString();
     }
 

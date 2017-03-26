@@ -31,7 +31,7 @@ public class Request {
         byte[] idByte = id.getBytes();
         byte[] requestTypeByte = requestType.getBytes();
 
-        byte[] byteArray = new byte[1024];
+        byte[] byteArray = new byte[32768];
         int cursor = 0;
 
         byteArray[cursor++] = (byte) idByte.length;
@@ -53,5 +53,9 @@ public class Request {
     public DatagramPacket getPacket(){
         byte[] data = this.marshal();
         return new DatagramPacket(data, data.length, serverHost, serverPort);
+    }
+
+    public String getType() {
+        return this.requestType;
     }
 }

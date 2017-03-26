@@ -18,7 +18,7 @@ public class DateTime implements Comparable<DateTime> {
         }
         return new DateTime(day, totalMinutes);
     }
-
+    
     public DayOfWeek getDay() {
         return this.day;
     }

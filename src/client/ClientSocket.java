@@ -25,7 +25,7 @@ public class ClientSocket {
         }
     }
 
-    private void close() {
+    public void close() {
         if (socket != null) {
             socket.close();
         }
@@ -42,7 +42,7 @@ public class ClientSocket {
         }
     }
 
-    public Reply receiveReply(boolean willClose) {
+    public Reply receiveReply() {
         Reply reply = new Reply();
         hasError = false;
         error = null;
@@ -52,7 +52,6 @@ public class ClientSocket {
             hasError = true;
             error = e.getMessage();
         }
-        if (willClose) close();
         return reply;
     }
 }
