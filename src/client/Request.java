@@ -14,15 +14,15 @@ import java.util.List;
 public class Request {
     private static long counter = 0;
     private String requestType;
-    private ArrayList<String> payload;
+    private ArrayList<String> payloads;
     private String id;
     private InetAddress serverHost;
     private int serverPort;
-    public Request(String clientIp, String requestType, ArrayList<String> payload, InetAddress serverHost, int serverPort) {
+    public Request(String clientIp, String requestType, ArrayList<String> payloads, InetAddress serverHost, int serverPort) {
         counter++;
         this.id = clientIp + '[' + counter + ']';
         this.requestType = requestType;
-        this.payload = payload;
+        this.payloads = payloads;
         this.serverHost = serverHost;
         this.serverPort = serverPort;
     }
@@ -40,7 +40,7 @@ public class Request {
         byteArray[cursor++] = (byte) requestTypeByte.length;
         System.arraycopy(requestTypeByte, 0, byteArray, cursor, requestTypeByte.length);
         cursor += requestTypeByte.length;
-        for (String p: payload) {
+        for (String p: payloads) {
             byte[] byteP = p.getBytes();
             byteArray[cursor++] = (byte) byteP.length;
             System.arraycopy(byteP, 0, byteArray, cursor, byteP.length);
@@ -57,5 +57,9 @@ public class Request {
 
     public String getType() {
         return this.requestType;
+    }
+
+    public ArrayList<String> getPayloads() {
+        return payloads;
     }
 }

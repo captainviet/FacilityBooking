@@ -1,7 +1,7 @@
 package client;
 
-import shared.DayOfWeek;
 import shared.Encoder;
+import shared.ICallback;
 import shared.Time;
 
 import java.io.BufferedReader;
@@ -9,14 +9,18 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TODO: Describe purpose and behavior of ClientMonitor
  */
 public class Client {
     private static HashMap<String, String> bookingCache = new HashMap<>();
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static final String INSTRUCTION = "Input your operation or h for help:\n";
     private static final String HELP = "LIST OF OPERATIONS (day is from 0 to 6 (Monday to Sunday), Format of time is hh:mm) \n";
     private static final String QUERY_AVAILABLE = "Query availability operation: q facility_name day1,day2,...,dayN (N <= 6)\n";
@@ -32,6 +36,7 @@ public class Client {
     private static final String CANCEL = "c";
     private static final String QUIT = "Q";
     private static final String INVALID = "INVALID";
+    public static final String STOP_MONITOR = "stop";
     private static String clientIp;
     private static InetAddress serverHost;
     private static int serverPort;
@@ -69,7 +74,7 @@ public class Client {
                         }
                         break;
                     case MONITOR:
-
+                        error = monitorFacility(operationCmd[1], operationCmd[2]);
                     case QUIT:
                     default:
                         printError(INVALID,"Invalid operation");
@@ -105,19 +110,18 @@ public class Client {
      */
     private static String queryAvailability(String facilityName, String days) {
         Request r = new Request(clientIp, QUERY, (ArrayList) Arrays.asList(new String[]{facilityName, days}), serverHost, serverPort);
-        String error = doOperation(r, new IFunction() {
-            @Override
-            public void handle(ArrayList<String> payloads) {
-                showFreeSlot(payloads);
-            }
-        });
+        String error = doOperation(r, payloads -> handleQueryAvailableResult(payloads));
         if  (error != null) {
             return error;
         }
         return null;
     }
 
-    private static void showFreeSlot(ArrayList<String> freeSlots) {
+    /**
+     *
+     * @param freeSlots
+     */
+    private static void handleQueryAvailableResult(ArrayList<String> freeSlots) {
         System.out.print("Free Slot:");
         for (String s : freeSlots) {
             String[] slots  = s.split(" ");
@@ -133,20 +137,15 @@ public class Client {
      * @param end the end time of booking slot
      * @return the string error of booking operation with given input.
      */
-    public static String bookFacility(String facilityName, String start, String end) {
-        String[] startTime = start.split(":");
-        String[] endTime = end.split(":");
-        String startFormatted  = startTime[0] + " " + Encoder.fromTimeToString(Time.getTime(Integer.parseInt(startTime[0]), Integer.parseInt(startTime[1])));
-        String endFormatted  = endTime[0] + " " + Encoder.fromTimeToString(Time.getTime(Integer.parseInt(endTime[0]), Integer.parseInt(endTime[1])));
+    private static String bookFacility(String facilityName, String start, String end) {
+        String startFormatted  = formatDateTimeInput(start);
+        String endFormatted  = formatDateTimeInput(end);
         String[] params = {facilityName, startFormatted, endFormatted};
         Request r = new Request(clientIp, BOOK, (ArrayList) Arrays.asList(params), serverHost, serverPort);
-        String error = doOperation(r, new IFunction() {
-            @Override
-            public void handle(ArrayList<String> payloads) {
-                payloads.add(start);
-                payloads.add(end);
-                handleBookingResult(payloads);
-            }
+        String error = doOperation(r, payloads -> {
+            payloads.add(start);
+            payloads.add(end);
+            handleBookingResult(payloads);
         });
         if (error != null) {
             return error;
@@ -156,36 +155,51 @@ public class Client {
     }
 
     /**
-     * Cache this confirmed booking and print the confirmationId
-     * @param payloads the payloads contain confirmation id, start and end time of bookingd
+     *
+     * @param payloads
      */
     private static void handleBookingResult(ArrayList<String> payloads) {
         String confirmationId = payloads.get(0);
-        bookingCache.put(confirmationId, payloads.get(1) + " " + payloads.get(2));
+//        bookingCache.put(confirmationId, payloads.get(1) + " " + payloads.get(2));
         System.out.printf("Booking confirmed, id: %s\n", confirmationId);
     }
 
     public static String editBooking(String confirmationID, String editMode, String minute) {
         Request r = new Request(clientIp, EDIT, (ArrayList) Arrays.asList(new String[]{confirmationID, editMode, minute}), serverHost, serverPort);
-        String error = doOperation(r, new IFunction() {
-            @Override
-            public void handle(ArrayList<String> payloads) {
+        String error = doOperation(r, payloads -> {
+            payloads.add(0, confirmationID);
 
-            }
+            handleEditBookingResult(payloads);
         });
         if (error != null) {
             return error;
         }
-//        String newStart = payloads.get(0);
-//        String newEnd = payloads.get(1);
-//        bookingCache.put(confirmationID, newStart + " " + newEnd);
-//        System.out.printf("New time slot for booking %s: from %s to %s\n", confirmationID, newStart, newEnd);
         return null;
     }
 
-    public static String monitoring(String name, String start, String end) {
+    /**
+     *
+     * @param payloads
+     */
+    private static void handleEditBookingResult(ArrayList<String> payloads) {
+        String confirmationId = payloads.get(0);
+        String ack = payloads.get(1);
+        System.out.printf("Edit booking %s, result: %s\n", confirmationId, ack);
+    }
+    private static String monitorFacility(String facilityName, String endDateTime) {
+        Request r = new Request(clientIp, EDIT, (ArrayList) Arrays.asList(new String[]{facilityName, endDateTime}), serverHost, serverPort);
+        String error = doOperation(r, payloads -> {
+            payloads.add(0, facilityName);
+            handleMonitorFacilityResult(payloads);
+        });
         return null;
     }
+
+    private static void handleMonitorFacilityResult(ArrayList<String> payloads) {
+        System.out.printf("[%s] Activity on facility %s: %s", payloads.get(0), payloads.get(1));
+    }
+
+
 
 //    public ArrayList<DayOfWeek> parseDays(String s) {
 //        String[] dayArr = s.split(",");-
@@ -196,50 +210,62 @@ public class Client {
 //        return days;
 //    }
 
+    /**
+     * Return the time in minutes from the beginning of day.
+     * @param time the time in hh:mm format
+     * @return the time in number of minutes
+     */
     public static String toMinutes(String time) {
         String[] timeSplit = time.split(":");
         return String.valueOf(Integer.parseInt(timeSplit[0]) * 60 + Integer.parseInt(timeSplit[1]));
+    }
+
+    /**
+     * Format the DateTime input from command line and return the string value of it.
+     * @param time the time in d:hh:mm format
+     * @return the formatted DateTime string
+     */
+    private static String formatDateTimeInput(String time) {
+        String[] timeSplit = time.split(":");
+        return timeSplit[0] + " " + Encoder.fromTimeToString(Time.getTime(Integer.parseInt(timeSplit[0]), Integer.parseInt(timeSplit[1])));
     }
     /**
      * Create a socket and send request to remote server, then wait to receive the reply and unmarshal it to get the payloads.
      * Return an OperationResult with two field error and payloads. If error is not null, payloads is null.
      * @param request
+     * @param f
      * @return
      */
-    public static String doOperation(Request request, IFunction f) {
+    public static String doOperation(Request request, ICallback f) {
         ClientSocket clientSocket = new ClientSocket();
         clientSocket.sendRequest(request);
         if (clientSocket.hasError) {
             return clientSocket.error();
         }
-        boolean closeSocket = request.getType() != MONITOR;
+        boolean isMonitorRequest = request.getType() != MONITOR;
 
-        while (!closeSocket) {
+        while(true) {
             Reply reply = clientSocket.receiveReply();
             if (clientSocket.hasError) {
+                clientSocket.close();
                 return clientSocket.error();
             }
             reply.Unmarshal();
             if (reply.statusCode == reply.ERROR_REPLY_CODE) {
+                clientSocket.close();
                 return clientSocket.error();
             } else {
+                if (reply.getPayloads().get(0) == STOP_MONITOR) {
+                    break;
+                }
                 f.handle(reply.getPayloads());
+                if (!isMonitorRequest) {
+                    break;
+                }
             }
         }
         clientSocket.close();
         return null;
     }
 
-    private static class OperationResult {
-        public String error;
-        public ArrayList<String> payloads;
-        public OperationResult(String error, ArrayList<String> payloads) {
-            this.error = error;
-            this.payloads = payloads;
-        }
-    }
-
-    private interface IFunction {
-        void handle(ArrayList<String> payloads);
-    }
 }
