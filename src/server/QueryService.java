@@ -64,17 +64,56 @@ public class QueryService {
         return slots;
     }
 
-    public static Map<Facility, List<FreeSlot>> getAllAvailableFacility() {
+    public static List<FreeSlot> getAvailableFacility(String name, DayOfWeek day, Time start, Time end) {
+        Facility facility = Facility.getFacilityByName(name);
+        // get list of bookings for the facility in the day & initialize an empty list of free slots
+        List<Booking> booked = facility.getTimetableOn(day);
+        List<FreeSlot> slots = new ArrayList<>();
+        if (booked.isEmpty()) {
+            slots.add(FreeSlot.getFreeSlot(start, end));
+            return slots;
+        } else {
+            Collections.sort(booked, new Booking.BookingComparator());
+            Booking firstBooking = booked.get(0);
+            if (firstBooking != null) {
+                slots.add(FreeSlot.getFreeSlot(Time.START_OF_DAY, firstBooking.getStartTime()));
+            }
+            Booking lastBooking = booked.get(booked.size() - 1);
+            if (lastBooking != null) {
+                slots.add(FreeSlot.getFreeSlot(lastBooking.getEndTime(), Time.END_OF_DAY));
+            }
+            int size = booked.size();
+            if (size > 1) {
+                for (int i = 0; i < size - 1; i++) {
+                    slots.add(FreeSlot.getFreeSlot(booked.get(i).getEndTime(), booked.get(i + 1).getStartTime()));
+                }
+            }
+            // transfer to a new list those that are in range
+            List<FreeSlot> inRange = new ArrayList<>();
+            for (FreeSlot slot: slots) {
+                if (slot.getEnd().compareTo(start) <= 0 || slot.getStart().compareTo(end) >= 0) continue;
+                if (slot.getStart().compareTo(start) <= 0 && slot.getEnd().compareTo(start) > 0) {
+                    inRange.add(FreeSlot.getFreeSlot(start, slot.getEnd()));
+                    continue;
+                }
+                if (slot.getStart().compareTo(end) < 0 && slot.getEnd().compareTo(end) >= 0) {
+                    inRange.add(FreeSlot.getFreeSlot(slot.getStart(), end));
+                    continue;
+                }
+                inRange.add(slot);
+            }
+            return inRange;
+        }
+    }
+
+    public static Map<Facility, List<FreeSlot>> getAllAvailableFacility(DayOfWeek day, Time start, Time end) {
         List<Facility> facilities = getAllFacility();
         Map<Facility, List<FreeSlot>> facilitySlots = new HashMap<>();
 
         for (Facility facility: facilities)
         {
             List<FreeSlot> slots = new ArrayList<>();
-            for (DayOfWeek day : DayOfWeek.values())
-            {
-                slots.addAll(getAvailableFacility(facility.getFacilityName(), day));
-            }
+            slots.addAll(getAvailableFacility(facility.getFacilityName(), day, start, end));
             facilitySlots.put(facility, slots);
         }
 
