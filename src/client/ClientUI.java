@@ -22,8 +22,8 @@ public class ClientUI {
         Client client = new Client(serverHost, serverPort);
         try {
         	client.start();
-        } catch (UnknownHostException ue) {
-        	ue.printStackTrace();
+        } catch (Exception e) {
+        	e.printStackTrace();
         	return;
         }
         String[] operationCmd;
@@ -32,51 +32,51 @@ public class ClientUI {
         while (true) {
             System.out.print(INSTRUCTION);
             operationCmd = br.readLine().split(" ");
-            if (operationCmd[0].equals(Client.HELP)) {
+            if (operationCmd[0].equals(Request.HELP)) {
                 printHelp();
                 continue;
             } else {
                 switch (operationCmd[0]) {
-                    case Client.QUERY:
+                    case Request.QUERY:
                         error = client.queryAvailability(operationCmd[1], operationCmd[2].replace(",",""));
                         if (error != null) {
-                            printError(Client.QUERY, error);
+                            printError(Request.QUERY, error);
                         }
                         break;
-                    case Client.BOOK:
+                    case Request.BOOK:
                         error = client.bookFacility(operationCmd[1], operationCmd[2].replace(":", " "), operationCmd[3].replace(":", " "));
                         if (error != null) {
-                            printError(Client.BOOK, error);
+                            printError(Request.BOOK, error);
                         }
                         break;
-                    case Client.EDIT:
+                    case Request.EDIT:
                         error = client.editBooking(operationCmd[1], operationCmd[2], toMinutes(operationCmd[3]));
                         if (error != null) {
-                            printError(Client.EDIT, error);
+                            printError(Request.EDIT, error);
                         }
                         break;
-                    case Client.MONITOR:
+                    case Request.MONITOR:
                         error = client.monitorFacility(operationCmd[1], operationCmd[2]);
                         if (error != null) {
-                            printError(Client.MONITOR, error);
+                            printError(Request.MONITOR, error);
                         }
                         break;
-                    case Client.CANCEL:
+                    case Request.CANCEL:
                     	error = client.cancelBooking(operationCmd[1]);
                         if (error != null) {
-                            printError(Client.CANCEL, error);
+                            printError(Request.CANCEL, error);
                         }
                         break;
-                    case Client.GET_ALL:
+                    case Request.GET_ALL:
                     	error = client.getAllAvailableFacilities(operationCmd[1]);
                     	if (error != null) {
-                            printError(Client.CANCEL, error);
+                            printError(Request.CANCEL, error);
                         }
                     	break;
-                    case Client.QUIT:
+                    case Request.QUIT:
                     	return;
                     default:
-                        printError(Client.INVALID,"Invalid operation");
+                        printError(Request.INVALID,"Invalid operation");
                 }
             }
         }

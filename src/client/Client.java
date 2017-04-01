@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,15 +30,6 @@ import java.util.concurrent.TimeoutException;
  *
  */
 public class Client {
-	public static final String HELP = "h";
-    public static final String QUERY = "q";
-    public static final String BOOK = "b";
-    public static final String EDIT = "e";
-    public static final String MONITOR = "m";
-    public static final String GET_ALL = "a";
-    public static final String CANCEL = "c";
-    public static final String QUIT = "Q";
-    public static final String INVALID = "INVALID";
     public static final String START_MONITOR = "start_monitor";
     public static final String STOP_MONITOR = "stop_monitor";
     public static final String TIME_SERVER = "t_server";
@@ -57,11 +49,7 @@ public class Client {
     	this.serverPort = serverPort;
     }
 
-    /**
-     * 
-     * @throws UnknownHostException
-     */
-    public void start() throws UnknownHostException {
+    public void start() throws SocketException {
     	clientSocket = new ClientSocket(serverHost, serverPort);
     	clientIp = clientSocket.getIp();
     }
@@ -73,8 +61,8 @@ public class Client {
      */
     public String queryAvailability(String facilityName, String days) {
     	String[] params = new String[]{facilityName, days};
-        Request r = new Request(clientIp, QUERY, (ArrayList<String>) Arrays.asList(params));
-        String error = doOperation(r, false, payloads -> handleQueryAvailableResult(payloads));
+        Request r = new Request(clientIp, Request.QUERY, (ArrayList<String>) Arrays.asList(params));
+        String error = doOperation(r, false, payloads -> handleQueryAvailabilityResult(payloads));
         if (error != null) { return error; }
         return null;
     }
@@ -83,7 +71,7 @@ public class Client {
      *
      * @param freeSlots
      */
-    private void handleQueryAvailableResult(ArrayList<String> freeSlots) {
+    private void handleQueryAvailabilityResult(ArrayList<String> freeSlots) {
         System.out.print("Free Slot:");
         for (String s : freeSlots) {
             String[] slots  = s.split(" ");
@@ -103,7 +91,7 @@ public class Client {
         String startFormatted  = formatDateTimeInput(start);
         String endFormatted  = formatDateTimeInput(end);
         String[] params = {facilityName, startFormatted, endFormatted};
-        Request r = new Request(clientIp, BOOK, (ArrayList<String>) Arrays.asList(params));
+        Request r = new Request(clientIp, Request.BOOK, (ArrayList<String>) Arrays.asList(params));
         String error = doOperation(r, false, payloads -> {
             handleBookingResult(payloads);
         });
@@ -129,7 +117,7 @@ public class Client {
      */
     public String editBooking(String confirmationID, String editMode, String minute) {
     	String[] params = new String[]{confirmationID, editMode, minute};
-        Request r = new Request(clientIp, EDIT, (ArrayList<String>) Arrays.asList(params));
+        Request r = new Request(clientIp, Request.EDIT, (ArrayList<String>) Arrays.asList(params));
         String error = doOperation(r, false, payloads -> {
             handleEditBookingResult(payloads);
         });
@@ -144,7 +132,7 @@ public class Client {
     private void handleEditBookingResult(ArrayList<String> payloads) {
         String confirmationId = payloads.get(0);
         String ack = payloads.get(1);
-        System.out.printf("Edit booking %s success\n", confirmationId, ack);
+        System.out.printf("Edit booking %s success\n", confirmationId);
     }
     
     /**
@@ -155,8 +143,8 @@ public class Client {
      */
     public String monitorFacility(String facilityName, String endDateTime) {
     	String endFormatted  = formatDateTimeInput(endDateTime);
-    	String[] params = new String[]{facilityName, endFormatted};
-        Request r = new Request(clientIp, MONITOR, (ArrayList<String>) Arrays.asList(params));
+    	String[] params = new String[]{facilityName, endFormatted, clientIp};
+        Request r = new Request(clientIp, Request.MONITOR, (ArrayList<String>) Arrays.asList(params));
         String error = doOperation(r, true, payloads -> {
             handleMonitorFacilityResult(payloads);
         });
@@ -177,7 +165,7 @@ public class Client {
      */
     public String cancelBooking(String confirmationId) {
     	String[] params = new String[]{confirmationId};
-    	Request r = new Request(clientIp, CANCEL, (ArrayList<String>) Arrays.asList(params));
+    	Request r = new Request(clientIp, Request.CANCEL, (ArrayList<String>) Arrays.asList(params));
     	String error = doOperation(r, false, payloads -> {
     		handleCancelBookingResult(payloads);
     	});
@@ -190,7 +178,7 @@ public class Client {
      * @param payloads
      */
     private void handleCancelBookingResult(ArrayList<String> payloads) {
-    	System.out.printf("Cancel booking %s success\n");
+    	System.out.printf("Cancel booking %s success\n", payloads.get(0));
     }
     
     /**
@@ -200,7 +188,7 @@ public class Client {
      */
     public String getAllAvailableFacilities(String date) {
     	String[] params = new String[]{date};
-    	Request r = new Request(clientIp, GET_ALL, (ArrayList<String>) Arrays.asList(params));
+    	Request r = new Request(clientIp, Request.GET_ALL, (ArrayList<String>) Arrays.asList(params));
     	String error = doOperation(r, false, payloads -> {
     		payloads.add(0, date);
     		handleGetAllAvailableFacilities(payloads);

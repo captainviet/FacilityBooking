@@ -21,10 +21,10 @@ public class Receiver implements Callable<String> {
             byte[] data = clientSocket.receiveReply();
             String error = clientSocket.error();
             if (error != null) {
-            	if (error != ClientSocket.TIMEOUT) {
+            	if (error.equals(ClientSocket.TIMEOUT)) {
             		return error;
             	}
-            	System.out.println("Timeout receving reply. Retransmit requess...");
+            	System.out.println("Timeout receiving reply. Retransmit request...");
             	clientSocket.sendRequest(request);
             	continue;
             }
@@ -33,7 +33,7 @@ public class Receiver implements Callable<String> {
                 return clientSocket.error();
                 
             } else {
-                if (multipleReply && reply.getPayloads().get(0) == Client.STOP_MONITOR) {
+                if (multipleReply && reply.getPayloads().get(0).equals(Client.STOP_MONITOR)) {
                     break;
                 }
                 callback.handle(reply.getPayloads());

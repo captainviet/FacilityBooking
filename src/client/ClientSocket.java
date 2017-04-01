@@ -22,15 +22,11 @@ public class ClientSocket {
         return error;
     }
 
-    public ClientSocket(InetAddress serverHost, int serverPort)  {
-        try {
-            socket = new DatagramSocket();
-            socket.setSoTimeout(timeout);
-        } catch (SocketException se) {
-            error = se.getMessage();
-        }
-        this.serverHost = serverHost;
+    public ClientSocket(InetAddress serverHost, int serverPort) throws SocketException {
+    	this.serverHost = serverHost;
         this.serverPort = serverPort;
+        socket = new DatagramSocket();
+        socket.setSoTimeout(timeout);      
     }
 
     public void close() {

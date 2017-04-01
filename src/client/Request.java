@@ -10,6 +10,15 @@ import java.util.Arrays;
  * Created by nhattran on 24/3/17.
  */
 public class Request {
+	public static final String HELP = "h";
+    public static final String QUERY = "q";
+    public static final String BOOK = "b";
+    public static final String EDIT = "e";
+    public static final String MONITOR = "m";
+    public static final String GET_ALL = "a";
+    public static final String CANCEL = "c";
+    public static final String QUIT = "Q";
+    public static final String INVALID = "INVALID";
 	private final static String MESSAGE_END_CODE = "end";
     private static long counter = 0;
     private String requestType;
@@ -44,7 +53,6 @@ public class Request {
         this.id = clientIp + '[' + counter + ']';
         this.requestType = requestType;
         this.payloads = payloads;
-        this.payloads.add(MESSAGE_END_CODE);
     }
 
     public static byte[] marshal(Request request) {
@@ -61,6 +69,8 @@ public class Request {
         System.arraycopy(requestTypeBytes, 0, data, cursor, requestTypeBytes.length);
         cursor += requestTypeBytes.length;
         ByteBuffer buffer = ByteBuffer.allocate(4);
+        ArrayList<String> payloads = request.getPayloads();
+        payloads.add(MESSAGE_END_CODE);
         for (String p: request.getPayloads()) {
             byte[] byteP = p.getBytes();
             buffer.putInt(byteP.length);
@@ -70,6 +80,7 @@ public class Request {
             cursor += byteP.length;
             buffer.clear();
         }
+        payloads.remove(MESSAGE_END_CODE);
         return data;
     }
 
@@ -94,13 +105,14 @@ public class Request {
     	request.setRequestType(requestType);
     	cursor += typeLength;
     	ArrayList<String> payloads = new ArrayList<>();
-    	while(payloads.get(payloads.size() - 1) != MESSAGE_END_CODE) {
+    	while(payloads.get(payloads.size() - 1).equals(MESSAGE_END_CODE)) {
     		ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(data, cursor, cursor + 4));
     		cursor += 4;
     		int pLength = buffer.getInt();
     		payloads.add(new String(Arrays.copyOfRange(data, cursor, pLength)));
     		cursor += pLength;
     	}
+    	payloads.remove(MESSAGE_END_CODE);
     	request.setPayloads(payloads);
 		return request;
     }
