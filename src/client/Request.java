@@ -10,6 +10,7 @@ import java.util.Arrays;
  * Created by nhattran on 24/3/17.
  */
 public class Request {
+	private final static String MESSAGE_END_CODE = "end";
     private static long counter = 0;
     private String requestType;
     public String getRequestType() {
@@ -43,33 +44,33 @@ public class Request {
         this.id = clientIp + '[' + counter + ']';
         this.requestType = requestType;
         this.payloads = payloads;
+        this.payloads.add(MESSAGE_END_CODE);
     }
 
     public static byte[] marshal(Request request) {
         byte[] idBytes = request.getId().getBytes();
         byte[] requestTypeBytes = request.getRequestType().getBytes();
 
-        byte[] byteArray = new byte[ClientSocket.MAX_PACKET_SIZE];
+        byte[] data = new byte[ClientSocket.MAX_PACKET_SIZE];
         int cursor = 0;
 
-        byteArray[cursor++] = (byte) idBytes.length;
-        System.arraycopy(idBytes, 0, byteArray, cursor, idBytes.length);
+        data[cursor++] = (byte) idBytes.length;
+        System.arraycopy(idBytes, 0, data, cursor, idBytes.length);
         cursor += idBytes.length;
-        byteArray[cursor++] = (byte) requestTypeBytes.length;
-        System.arraycopy(requestTypeBytes, 0, byteArray, cursor, requestTypeBytes.length);
+        data[cursor++] = (byte) requestTypeBytes.length;
+        System.arraycopy(requestTypeBytes, 0, data, cursor, requestTypeBytes.length);
         cursor += requestTypeBytes.length;
         ByteBuffer buffer = ByteBuffer.allocate(4);
         for (String p: request.getPayloads()) {
             byte[] byteP = p.getBytes();
             buffer.putInt(byteP.length);
-            System.arraycopy(buffer.array(), 0, byteArray, cursor, 4);
+            System.arraycopy(buffer.array(), 0, data, cursor, 4);
             cursor += 4;
-            System.arraycopy(byteP, 0, byteArray, cursor, byteP.length);
+            System.arraycopy(byteP, 0, data, cursor, byteP.length);
             cursor += byteP.length;
             buffer.clear();
         }
-        byteArray[cursor] = Byte.MIN_VALUE;
-        return byteArray;
+        return data;
     }
 
     public String getType() {
@@ -93,7 +94,7 @@ public class Request {
     	request.setRequestType(requestType);
     	cursor += typeLength;
     	ArrayList<String> payloads = new ArrayList<>();
-    	while(data[cursor]!= Byte.MIN_VALUE) {
+    	while(payloads.get(payloads.size() - 1) != MESSAGE_END_CODE) {
     		ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(data, cursor, cursor + 4));
     		cursor += 4;
     		int pLength = buffer.getInt();

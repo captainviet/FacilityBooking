@@ -28,7 +28,7 @@ public class Receiver implements Callable<String> {
             	clientSocket.sendRequest(request);
             	continue;
             }
-            Reply reply = Reply.Unmarshal(data);
+            Reply reply = Reply.unmarshal(data);
             if (reply.statusCode == Reply.ERROR_REPLY_CODE) {
                 return clientSocket.error();
                 
