@@ -1,6 +1,10 @@
 package server;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import shared.DateTime;
 import shared.DayOfWeek;
@@ -15,18 +19,17 @@ public class QueryService {
     private static final int ADVANCE_MINUTE_LIMIT = -60;
     private static final int POSTPONE_MINUTE_LIMIT = 30;
 
-    private static List<Facility> facilities = new ArrayList<>();
-
     private QueryService() {
 
     }
 
-    public static void setFacilityList(List<Facility> list) {
-        facilities = list;
-    }
-
-    public static List<Facility> getAllFacility() {
-        return facilities;
+    public static void initialize() {
+        String LT = "LT";
+        String TR = "TR";
+        for (int i = 1; i <= 10; i++) {
+            Facility.addFacility(LT + i);
+            Facility.addFacility(TR + i);
+        }
     }
 
     private enum BookingEditMode {
@@ -34,8 +37,7 @@ public class QueryService {
         POSTPONE
     }
 
-    public static List<FreeSlot> getAvailableFacility(String name, DayOfWeek day) {
-        Facility facility = Facility.getFacilityByName(name);
+    public static List<FreeSlot> getAvailableFacility(Facility facility, DayOfWeek day) {
         // get list of bookings for the facility in the day & initialize an empty list of free slots
         List<Booking> booked = facility.getTimetableOn(day);
         List<FreeSlot> slots = new ArrayList<>();
@@ -64,8 +66,7 @@ public class QueryService {
         return slots;
     }
 
-    public static List<FreeSlot> getAvailableFacility(String name, DayOfWeek day, Time start, Time end) {
-        Facility facility = Facility.getFacilityByName(name);
+    public static List<FreeSlot> getAvailableFacility(Facility facility, DayOfWeek day, Time start, Time end) {
         // get list of bookings for the facility in the day & initialize an empty list of free slots
         List<Booking> booked = facility.getTimetableOn(day);
         List<FreeSlot> slots = new ArrayList<>();
@@ -90,8 +91,9 @@ public class QueryService {
             }
             // transfer to a new list those that are in range
             List<FreeSlot> inRange = new ArrayList<>();
-            for (FreeSlot slot: slots) {
-                if (slot.getEnd().compareTo(start) <= 0 || slot.getStart().compareTo(end) >= 0) continue;
+            for (FreeSlot slot : slots) {
+                if (slot.getEnd().compareTo(start) <= 0 || slot.getStart().compareTo(end) >= 0)
+                    continue;
                 if (slot.getStart().compareTo(start) <= 0 && slot.getEnd().compareTo(start) > 0) {
                     inRange.add(FreeSlot.getFreeSlot(start, slot.getEnd()));
                     continue;
@@ -106,25 +108,25 @@ public class QueryService {
         }
     }
 
-    public static Map<Facility, List<FreeSlot>> getAllAvailableFacility(DayOfWeek day, Time start, Time end) {
-        List<Facility> facilities = getAllFacility();
+    public static Map<Facility, List<FreeSlot>> getAllAvailableFacility() {
+        List<Facility> facilities = Facility.getAllFacility();
         Map<Facility, List<FreeSlot>> facilitySlots = new HashMap<>();
 
-        for (Facility facility: facilities)
-        {
+        for (Facility facility : facilities) {
             List<FreeSlot> slots = new ArrayList<>();
-            slots.addAll(getAvailableFacility(facility.getFacilityName(), day, start, end));
+            for (DayOfWeek day : DayOfWeek.values()) {
+                slots.addAll(getAvailableFacility(facility, day));
+            }
             facilitySlots.put(facility, slots);
         }
 
         return facilitySlots;
     }
 
-    public static long getConfirmationID(String name, DateTime start, DateTime end) {
+    public static long getConfirmationID(Facility facility, DateTime start, DateTime end) {
         int confirmationID = (int) System.currentTimeMillis() >> 16;
         DayOfWeek startDay = start.getDay();
         DayOfWeek endDay = end.getDay();
-        Facility facility = Facility.getFacilityByName(name);
         if (startDay.compareTo(endDay) == -1) {
             // if the booking spans multiple days, add the booking for start day and end day first
             Booking bS = Booking.placeBooking(confirmationID, start.getTime(), Time.END_OF_DAY);

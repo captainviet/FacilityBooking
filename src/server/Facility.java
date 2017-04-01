@@ -26,7 +26,6 @@ public class Facility {
 
     private Facility(String name) {
         this.name = name;
-        addFacility(name);
     }
 
     public String getFacilityName() {
@@ -37,8 +36,8 @@ public class Facility {
         return this.timetable.get(day);
     }
 
-    protected boolean cancelBooking(DayOfWeek day, Booking booking){
-        if (timetable.get(day).contains(booking)){
+    protected boolean cancelBooking(DayOfWeek day, Booking booking) {
+        if (timetable.get(day).contains(booking)) {
             this.timetable.get(day).remove(booking);
             return true;
         }
@@ -55,6 +54,12 @@ public class Facility {
 
     protected static Facility getFacilityByName(String name) {
         return index.get(name);
+    }
+
+    protected static List<Facility> getAllFacility() {
+        List<Facility> facilities = new ArrayList<>();
+        facilities.addAll(index.values());
+        return facilities;
     }
 
     @Override
