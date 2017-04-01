@@ -1,12 +1,10 @@
 package client;
 
-import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by nhattran on 24/3/17.
@@ -14,45 +12,64 @@ import java.util.List;
 public class Request {
     private static long counter = 0;
     private String requestType;
-    private ArrayList<String> payloads;
-    private String id;
-    private InetAddress serverHost;
-    private int serverPort;
-    public Request(String clientIp, String requestType, ArrayList<String> payloads, InetAddress serverHost, int serverPort) {
+    public String getRequestType() {
+		return requestType;
+	}
+
+	public void setRequestType(String requestType) {
+		this.requestType = requestType;
+	}
+
+	private ArrayList<String> payloads;
+    public void setPayloads(ArrayList<String> payloads) {
+		this.payloads = payloads;
+	}
+
+	private String id;
+    public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	private Request() {
+		
+	}
+	
+    public Request(String clientIp, String requestType, ArrayList<String> payloads) {
         counter++;
         this.id = clientIp + '[' + counter + ']';
         this.requestType = requestType;
         this.payloads = payloads;
-        this.serverHost = serverHost;
-        this.serverPort = serverPort;
     }
 
-    public byte[] marshal() {
-        byte[] idByte = id.getBytes();
-        byte[] requestTypeByte = requestType.getBytes();
+    public static byte[] marshal(Request request) {
+        byte[] idBytes = request.getId().getBytes();
+        byte[] requestTypeBytes = request.getRequestType().getBytes();
 
-        byte[] byteArray = new byte[32768];
+        byte[] byteArray = new byte[ClientSocket.MAX_PACKET_SIZE];
         int cursor = 0;
 
-        byteArray[cursor++] = (byte) idByte.length;
-        System.arraycopy(idByte, 0, byteArray, cursor, idByte.length);
-        cursor += idByte.length;
-        byteArray[cursor++] = (byte) requestTypeByte.length;
-        System.arraycopy(requestTypeByte, 0, byteArray, cursor, requestTypeByte.length);
-        cursor += requestTypeByte.length;
-        for (String p: payloads) {
+        byteArray[cursor++] = (byte) idBytes.length;
+        System.arraycopy(idBytes, 0, byteArray, cursor, idBytes.length);
+        cursor += idBytes.length;
+        byteArray[cursor++] = (byte) requestTypeBytes.length;
+        System.arraycopy(requestTypeBytes, 0, byteArray, cursor, requestTypeBytes.length);
+        cursor += requestTypeBytes.length;
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        for (String p: request.getPayloads()) {
             byte[] byteP = p.getBytes();
-            byteArray[cursor++] = (byte) byteP.length;
+            buffer.putInt(byteP.length);
+            System.arraycopy(buffer.array(), 0, byteArray, cursor, 4);
+            cursor += 4;
             System.arraycopy(byteP, 0, byteArray, cursor, byteP.length);
             cursor += byteP.length;
+            buffer.clear();
         }
         byteArray[cursor] = Byte.MIN_VALUE;
         return byteArray;
-    }
-
-    public DatagramPacket getPacket(){
-        byte[] data = this.marshal();
-        return new DatagramPacket(data, data.length, serverHost, serverPort);
     }
 
     public String getType() {
@@ -62,4 +79,29 @@ public class Request {
     public ArrayList<String> getPayloads() {
         return payloads;
     }
+    
+    public static Request unmarshal(byte[] data) {
+    	Request request = new Request();
+    	int cursor = 0;
+    	
+    	int idLength  = (int) data[cursor++] & 0xFF;
+    	String id = new String(Arrays.copyOfRange(data, cursor, idLength));
+    	request.setId(id);
+    	cursor += idLength;
+    	int typeLength = (int) data[cursor++] & 0xFF;
+    	String requestType = new String(Arrays.copyOfRange(data, cursor, typeLength));
+    	request.setRequestType(requestType);
+    	cursor += typeLength;
+    	ArrayList<String> payloads = new ArrayList<>();
+    	while(data[cursor]!= Byte.MIN_VALUE) {
+    		ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(data, cursor, cursor + 4));
+    		cursor += 4;
+    		int pLength = buffer.getInt();
+    		payloads.add(new String(Arrays.copyOfRange(data, cursor, pLength)));
+    		cursor += pLength;
+    	}
+    	request.setPayloads(payloads);
+		return request;
+    }
+    
 }

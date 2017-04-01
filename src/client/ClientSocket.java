@@ -1,28 +1,36 @@
 package client;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 /**
  * Created by nhattran on 24/3/17.
  */
 public class ClientSocket {
+	public static final String TIMEOUT = "timeout";
+	public static final int timeout = 10000;
     private DatagramSocket socket;
+    public static final int MAX_PACKET_SIZE = 32768;
     private String error;
-    public boolean hasError;
+    private InetAddress serverHost;
+    private int serverPort;
     public String error() {
         return error;
     }
 
-    public ClientSocket()  {
+    public ClientSocket(InetAddress serverHost, int serverPort)  {
         try {
             socket = new DatagramSocket();
+            socket.setSoTimeout(timeout);
         } catch (SocketException se) {
-            hasError = true;
             error = se.getMessage();
         }
+        this.serverHost = serverHost;
+        this.serverPort = serverPort;
     }
 
     public void close() {
@@ -32,26 +40,44 @@ public class ClientSocket {
     }
 
     public void sendRequest(Request request) {
-        hasError = false;
-        error = null;
+    	clearError();
         try {
-            socket.send(request.getPacket());
+        	byte[] data = Request.marshal(request);
+        	DatagramPacket packet = new DatagramPacket(data, data.length, serverHost, serverPort);
+            socket.send(packet);
         } catch (IOException ie) {
-            hasError = true;
             error =  ie.getMessage();
         }
     }
-
-    public Reply receiveReply() {
-        Reply reply = new Reply();
-        hasError = false;
-        error = null;
+    
+    public byte[] receiveReply() {
+    	clearError();
+    	byte[] data = new byte[MAX_PACKET_SIZE];
+    	DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
-            socket.receive(reply.getPacket());
+            socket.receive(packet);
         } catch (IOException e) {
-            hasError = true;
-            error = e.getMessage();
+        	if (e instanceof SocketTimeoutException) {
+        		error = TIMEOUT;
+        	} else {
+        		error = e.getMessage();
+        	}
         }
-        return reply;
+        return packet.getData();
+    }
+    
+    public void setTimeOut(int timeInSeconds) throws SocketException {
+    	if (timeInSeconds * 1000 >= Integer.MAX_VALUE || timeInSeconds <= 0) {
+    		return;
+    	}
+    	socket.setSoTimeout(timeInSeconds * 1000);
+    }
+    
+    public String getIp(){
+    	return this.socket.getLocalAddress().getHostAddress();
+    }
+    
+    private void clearError() {
+    	error = null;
     }
 }

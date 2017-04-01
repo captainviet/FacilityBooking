@@ -1,7 +1,6 @@
 package client;
 
 import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -10,38 +9,51 @@ import java.util.Arrays;
  */
 public class Reply {
     public final static int ERROR_REPLY_CODE = 1;
-    private DatagramPacket packet;
     private ArrayList<String> payloads;
-    private String error;
+    private String errorMessage;
     public int statusCode;
     public Reply() {
-        byte[] byteData = new byte[1024];
-        packet = new DatagramPacket(byteData, byteData.length);
     }
 
-    public DatagramPacket getPacket() {
-        return packet;
-    }
-
-    public void Unmarshal(){
+    public static Reply Unmarshal(byte[] data){
+    	Reply reply = new Reply();
         int cursor = 0;
-        byte[] byteArray = packet.getData();
-        statusCode = (int) byteArray[cursor++];
-        while (byteArray[cursor] != Byte.MIN_VALUE) {
-            int pLength = (int) byteArray[cursor++];
-            String p = new String(Arrays.copyOfRange(byteArray, cursor, cursor + pLength));
+        int statusCode = (int) data[cursor++];
+        ArrayList<String> payloads = new ArrayList<>();
+        while (data[cursor] != Byte.MIN_VALUE) {
+            int pLength = (int) data[cursor++];
+            String p = new String(Arrays.copyOfRange(data, cursor, cursor + pLength));
             payloads.add(p);
         }
+        reply.setPayloads(payloads);
         if (statusCode == ERROR_REPLY_CODE) {
-            error = payloads.get(0);
+            reply.setError(payloads.get(0));
         }
+        reply.setStatusCode(statusCode);
+        return reply;
     }
 
-    public ArrayList<String> getPayloads() {
+    private void setError(String errorMessage) {
+		// TODO Auto-generated method stub
+		this.errorMessage = errorMessage;
+	}
+
+	private void setPayloads(ArrayList<String> payloads) {
+		// TODO Auto-generated method stub
+		this.payloads = payloads;
+	}
+
+	private void setStatusCode(int statusCode) {
+    	this.statusCode = statusCode;
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ArrayList<String> getPayloads() {
         return payloads;
     }
 
-    public String getError() {
-        return error;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }
