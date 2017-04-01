@@ -10,6 +10,7 @@ import java.util.Arrays;
  */
 public class Reply {
     public final static int ERROR_REPLY_CODE = 1;
+    public final static int SUCCESS_REPLY_CODE = 0;
     private final static String MESSAGE_END_CODE = "end";
     private ArrayList<String> payloads;
     private String errorMessage;

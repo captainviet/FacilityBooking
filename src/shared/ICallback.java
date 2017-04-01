@@ -9,5 +9,4 @@ import client.Request;
  */
 public interface ICallback {
     void handle(ArrayList<String> payloads);
-    void printRequestResult(Request request, String error);
 }

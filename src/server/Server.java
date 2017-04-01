@@ -1,6 +1,5 @@
 package server;
 
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -9,7 +8,9 @@ import java.util.List;
 
 import client.Reply;
 import client.Request;
+import shared.DateTime;
 import shared.DayOfWeek;
+import shared.Encoder;
 import shared.FreeSlot;
 import shared.ICallback;
 
@@ -18,6 +19,7 @@ import shared.ICallback;
  */
 public class Server {
 	private final static String ERROR_INVALID_FACILITY_NAME = "Invalid facility name";
+	private final static String ERROR_BOOKING_CLASHED = "Booking time clashed";
     private enum SemanticsMode {
         AT_MOST_ONCE,
         AT_LEAST_ONCE
@@ -44,13 +46,17 @@ public class Server {
     
     public String receiveAndProcessRequest(ICallback callback) {
     	String error;
+    	ArrayList<String> payloads = new ArrayList<>();
     	byte[] data = serverSocket.receiveRequest();
     	if (serverSocket.getError() != null) {
     		return serverSocket.getError();
     	} else {
     		Request request = Request.unmarshal(data);
     		error = handleRequest(request);
-    		callback.printRequestResult(request, error);
+    		payloads.add(request.getId());
+    		payloads.add(request.getRequestType());
+    		payloads.add(error);
+    		callback.handle(payloads);
     	}
     	return null;
     }
@@ -58,13 +64,13 @@ public class Server {
     private String handleRequest(Request request) {
     	switch(request.getRequestType()) {
     	case Request.QUERY:
-    		 processQueryAvailabilityRequest(request.getPayloads());
+    		processQueryAvailabilityRequest(request.getPayloads());
     		break;
     	case Request.BOOK:
-    		handleBookingRequest(request.getPayloads());  		
+    		processBookingRequest(request.getPayloads());  		
     		break;
     	case Request.EDIT:
-    		handleEditBookingRequest(request.getPayloads());
+    		processEditBookingRequest(request.getPayloads());
     		break;
     	case Request.MONITOR:
     		handleMonitorRequest(request.getPayloads());
@@ -96,14 +102,42 @@ public class Server {
 		
 	}
 
-	private void handleEditBookingRequest(ArrayList<String> payloads) {
-		// TODO Auto-generated method stub
-		
+	private void processEditBookingRequest(ArrayList<String> payloads) {
+		ArrayList<String> result = new ArrayList<>();
+		boolean hasError = false;
+		String facilityName = payloads.get(0);
+		Facility facility = Facility.getFacilityByName(facilityName);
+		if (facility == null) {
+			hasError = true;
+			result.add(ERROR_INVALID_FACILITY_NAME);
+		} else {
+			long confirmationId = Long.parseLong(payloads.get(0));
+			int editMode = Integer.parseInt(payloads.get(1));
+			int interval = Integer.parseInt(payloads.get(0));
+		}
 	}
 
-	private void handleBookingRequest(ArrayList<String> payloads) {
-		// TODO Auto-generated method stub
-		
+	private String processBookingRequest(ArrayList<String> payloads) {
+		ArrayList<String> result = new ArrayList<>();
+		boolean hasError = false;
+		String facilityName = payloads.get(0);
+		Facility facility = Facility.getFacilityByName(facilityName);
+		if (facility == null) {
+			hasError = true;
+			result.add(ERROR_INVALID_FACILITY_NAME);
+		} else {
+			DateTime start = Encoder.fromStringToDateTime(payloads.get(1));
+			DateTime end = Encoder.fromStringToDateTime(payloads.get(2));
+			long confirmationId = QueryService.getConfirmationID(facilityName, start, end);
+			if (confirmationId == -1) {
+				hasError = true;
+				result.add(ERROR_BOOKING_CLASHED);
+			} else {
+				result.add(String.valueOf(confirmationId));
+			}
+		}
+		Reply reply = new Reply(hasError, result);
+    	return sendReply(reply);
 	}
 
 	private String processQueryAvailabilityRequest(ArrayList<String> payloads) {
