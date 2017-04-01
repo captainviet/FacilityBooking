@@ -1,6 +1,10 @@
 package server;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import shared.DateTime;
 import shared.DayOfWeek;
@@ -15,18 +19,17 @@ public class QueryService {
     private static final int ADVANCE_MINUTE_LIMIT = -60;
     private static final int POSTPONE_MINUTE_LIMIT = 30;
 
-    private static List<Facility> facilities = new ArrayList<>();
-
     private QueryService() {
 
     }
 
-    public static void setFacilityList(List<Facility> list) {
-        facilities = list;
-    }
-
-    public static List<Facility> getAllFacility() {
-        return facilities;
+    public static void initialize() {
+        String LT = "LT";
+        String TR = "TR";
+        for (int i = 1; i <= 10; i++) {
+            Facility.addFacility(LT + i);
+            Facility.addFacility(TR + i);
+        }
     }
 
     private enum BookingEditMode {
@@ -65,14 +68,12 @@ public class QueryService {
     }
 
     public static Map<Facility, List<FreeSlot>> getAllAvailableFacility() {
-        List<Facility> facilities = getAllFacility();
+        List<Facility> facilities = Facility.getAllFacility();
         Map<Facility, List<FreeSlot>> facilitySlots = new HashMap<>();
 
-        for (Facility facility: facilities)
-        {
+        for (Facility facility : facilities) {
             List<FreeSlot> slots = new ArrayList<>();
-            for (DayOfWeek day : DayOfWeek.values())
-            {
+            for (DayOfWeek day : DayOfWeek.values()) {
                 slots.addAll(getAvailableFacility(facility.getFacilityName(), day));
             }
             facilitySlots.put(facility, slots);
