@@ -22,7 +22,7 @@ public class Reply {
     private Reply() {}
     
 	public Reply(boolean hasError, ArrayList<String> payloads) {
-		this.statusCode = hasError ? 1 : 0;
+		this.statusCode = hasError ? ERROR_REPLY_CODE : SUCCESS_REPLY_CODE;
 		if (hasError) {
 			this.errorMessage = payloads.get(0);
 		} 

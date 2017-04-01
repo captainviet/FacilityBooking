@@ -4,12 +4,12 @@ import java.util.concurrent.Callable;
 
 import shared.ICallback;
 
-public class Receiver implements Callable<String> {
+public class ReplyReceiver implements Callable<String> {
 	private ClientSocket clientSocket;
 	private boolean multipleReply;
 	private ICallback callback;
 	private Request request;
-	public Receiver(Request request, ClientSocket clientSocket, boolean multipleReply, ICallback f) {
+	public ReplyReceiver(Request request, ClientSocket clientSocket, boolean multipleReply, ICallback f) {
 		this.clientSocket = clientSocket;
 		this.multipleReply = multipleReply;
 		this.callback = f;

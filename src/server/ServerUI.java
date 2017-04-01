@@ -16,7 +16,7 @@ public class ServerUI {
         	return;
         }
 		while (true) {
-			
+			server.receiveAndProcessRequest();
 		}
 	}
 

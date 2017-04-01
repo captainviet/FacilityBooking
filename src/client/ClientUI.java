@@ -12,6 +12,8 @@ public class ClientUI {
     private static final String BOOKING = "Book a facility: b facility_name start end (format of start, end, is day:time)\n";
     private static final String EDIT_BOOKING = "Edit a booking: e confirmation_id edit_mode time (edit_mode 0: advance, 1: postpone)\n";
     private static final String MONITORING = "Monitoring a facility: m facility_name end (end is day:time)\n";
+    private static final String GET_ALL_AVAILABLE_IN_TIME_RANGE = "Get all available facilities in time range: g day time_start time_end\n";
+    private static final String CANCEL_BOOKING = "Cancel a booking: c confirmation_id\n";
     private static final String QUIT_PROGRAM = "Quit client: Q (or Ctrl + C)\n";
     private static InetAddress serverHost;
     private static int serverPort;
@@ -50,7 +52,7 @@ public class ClientUI {
                         }
                         break;
                     case Request.EDIT:
-                        error = client.editBooking(operationCmd[1], operationCmd[2], toMinutes(operationCmd[3]));
+                        error = client.editBooking(operationCmd[1], operationCmd[2], operationCmd[3]);
                         if (error != null) {
                             printError(Request.EDIT, error);
                         }
@@ -68,7 +70,7 @@ public class ClientUI {
                         }
                         break;
                     case Request.GET_ALL:
-                    	error = client.getAllAvailableFacilities(operationCmd[1]);
+                    	error = client.getAllAvailableFacilitiesInTimeRange(operationCmd[1], operationCmd[2], operationCmd[3]);
                     	if (error != null) {
                             printError(Request.CANCEL, error);
                         }
@@ -87,7 +89,9 @@ public class ClientUI {
      */
     private static void printHelp() {
         StringBuilder sb = new StringBuilder();
-        sb.append(HELP_INTRO).append(QUERY_AVAILABLE).append(BOOKING).append(EDIT_BOOKING).append(MONITORING).append(QUIT_PROGRAM);
+        sb.append(HELP_INTRO).append(QUERY_AVAILABLE).append(BOOKING).append(EDIT_BOOKING)
+        .append(MONITORING).append(GET_ALL_AVAILABLE_IN_TIME_RANGE).append(CANCEL_BOOKING)
+        .append(QUIT_PROGRAM);
         System.out.print(sb.toString());
     }
 
@@ -100,13 +104,4 @@ public class ClientUI {
         System.out.printf("Operation: %s, Error: %s\n", operation, msg);
     }
     
-    /**
-     * Return the time in minutes from the beginning of day.
-     * @param time the time in hh:mm format
-     * @return the time in number of minutes
-     */
-    private static String toMinutes(String time) {
-        String[] timeSplit = time.split(":");
-        return String.valueOf(Integer.parseInt(timeSplit[0]) * 60 + Integer.parseInt(timeSplit[1]));
-    }
 }

@@ -1,11 +1,13 @@
 package server;
 
+import client.Reply;
+
 public class ReplyRecord {
 	private String requestId;
 	private long expired;
-	private String reply;
+	private Reply reply;
 	
-	public ReplyRecord(String requestId, long expired, String reply) {
+	public ReplyRecord(String requestId, long expired, Reply reply) {
 		this.requestId = requestId;
 		this.reply = reply;
 		this.expired = expired;
@@ -19,7 +21,7 @@ public class ReplyRecord {
 		return expired;
 	}
 
-	public String getReply() {
+	public Reply getReply() {
 		return reply;
 	}
 	

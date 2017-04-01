@@ -3,6 +3,7 @@ package client;
 import shared.DateTime;
 import shared.DayOfWeek;
 import shared.Encoder;
+import shared.FreeSlot;
 import shared.ICallback;
 import shared.Time;
 
@@ -71,11 +72,15 @@ public class Client {
      *
      * @param freeSlots
      */
-    private void handleQueryAvailabilityResult(ArrayList<String> freeSlots) {
-        System.out.print("Free Slot:");
-        for (String s : freeSlots) {
-            String[] slots  = s.split(" ");
-            System.out.printf("%s: from %s to %s\n", slots[0], Encoder.fromStringToTime(slots[1]), Encoder.fromStringToTime(slots[2]));
+    private void handleQueryAvailabilityResult(ArrayList<String> freeSlotsInDays) {
+        System.out.print("Free Slot:\n");
+        for (String freeSlotsInDay : freeSlotsInDays) {
+            String[] s  = freeSlotsInDay.split("|");
+            DayOfWeek day = DayOfWeek.valueOf(Integer.parseInt(s[0]));
+            for (int i = 1; i < s.length; ++i) {
+            	FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
+            	System.out.printf("%s: from %s to %s\n", day, freeSlot.getStart().toString(), freeSlot.getEnd().toString());
+            }
         }
     }
 
@@ -115,8 +120,9 @@ public class Client {
      * @param minute
      * @return
      */
-    public String editBooking(String confirmationID, String editMode, String minute) {
-    	String[] params = new String[]{confirmationID, editMode, minute};
+    public String editBooking(String confirmationID, String editMode, String timeOffset) {
+    	String formattedTimeOffset = formatTimeInput(timeOffset);
+    	String[] params = new String[]{confirmationID, editMode, formattedTimeOffset};
         Request r = new Request(clientIp, Request.EDIT, (ArrayList<String>) Arrays.asList(params));
         String error = doOperation(r, false, payloads -> {
             handleEditBookingResult(payloads);
@@ -131,7 +137,6 @@ public class Client {
      */
     private void handleEditBookingResult(ArrayList<String> payloads) {
         String confirmationId = payloads.get(0);
-        String ack = payloads.get(1);
         System.out.printf("Edit booking %s success\n", confirmationId);
     }
     
@@ -146,6 +151,7 @@ public class Client {
     	String[] params = new String[]{facilityName, endFormatted, clientIp};
         Request r = new Request(clientIp, Request.MONITOR, (ArrayList<String>) Arrays.asList(params));
         String error = doOperation(r, true, payloads -> {
+        	payloads.add(0, facilityName);
             handleMonitorFacilityResult(payloads);
         });
         if (error != null) { return error; }
@@ -153,9 +159,16 @@ public class Client {
     }
 
     private void handleMonitorFacilityResult(ArrayList<String> payloads) {
-    	SimpleDateFormat format = new SimpleDateFormat("E h:m");
-    	String time = format.format(Calendar.getInstance().getTime());
-        System.out.printf("[%s] Activity on facility %s: %s", time, payloads.get(0), payloads.get(1));
+        System.out.printf("[%s] Available on facility %s overweek:\n", currentFormatTime(), payloads.get(0));
+        payloads.remove(0);
+        for (String freeSlotsInDay : payloads) {
+            String[] s  = freeSlotsInDay.split("|");
+            DayOfWeek day = DayOfWeek.valueOf(Integer.parseInt(s[0]));
+            for (int i = 1; i < s.length; ++i) {
+            	FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
+            	System.out.printf("%s: from %s to %s\n", day, freeSlot.getStart().toString(), freeSlot.getEnd().toString());
+            }
+        }
     }
 
     /**
@@ -186,8 +199,10 @@ public class Client {
      * @param date
      * @return
      */
-    public String getAllAvailableFacilities(String date) {
-    	String[] params = new String[]{date};
+    public String getAllAvailableFacilitiesInTimeRange(String date, String startTime, String endTime) {
+    	String formattedStartTime = formatTimeInput(startTime);
+    	String formattedEndTime = formatTimeInput(endTime);
+    	String[] params = new String[]{date, formattedStartTime, formattedEndTime};
     	Request r = new Request(clientIp, Request.GET_ALL, (ArrayList<String>) Arrays.asList(params));
     	String error = doOperation(r, false, payloads -> {
     		payloads.add(0, date);
@@ -202,12 +217,16 @@ public class Client {
      * @param payloads
      */
     private void handleGetAllAvailableFacilities(ArrayList<String> payloads) {
-    	int date = Integer.parseInt(payloads.get(0));
+    	int date = Integer.parseInt(payloads.remove(0));
     	System.out.printf("All available facilities in %s:\n", DayOfWeek.valueOf(date));
-    	for (int i = 1; i < payloads.size() - 1; ++i) {
-    		String[] payloadSplit = payloads.get(i).split(" ");
-    		System.out.printf("Facility %s, available slots: %s", payloadSplit[0], payloadSplit[1]);
-    	}
+    	for (String freeSlotsByFacility : payloads) {
+            String[] s  = freeSlotsByFacility.split("|");
+            String facilityName = s[0];
+            for (int i = 1; i < s.length; ++i) {
+            	FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
+            	System.out.printf("Facility %s: from %s to %s\n", facilityName, freeSlot.getStart().toString(), freeSlot.getEnd().toString());
+            }
+        }
     }
 
     /**
@@ -223,6 +242,19 @@ public class Client {
         Time tTime = Time.getTime(hour, minute);
         DateTime dt = DateTime.getDateTime(DayOfWeek.valueOf(day), tTime.getTotalMinutes());
         return Encoder.fromDateTimeToString(dt);
+    }
+    
+    /**
+     * 
+     * @param time
+     * @return
+     */
+    private String formatTimeInput(String time) {
+    	String[] timeSplit = time.split(":");
+    	int hour = Integer.parseInt(timeSplit[0]);
+        int minute = Integer.parseInt(timeSplit[1]);
+        Time tTime = Time.getTime(hour, minute);
+        return Encoder.fromTimeToString(tTime);
     }
     
     /**
@@ -244,7 +276,7 @@ public class Client {
 		if (multipleReply) {
 			interval = getMonitorInterval(request.getPayloads().get(1));
 		}
-		Receiver receiver = new Receiver(request, clientSocket, multipleReply, callback);
+		ReplyReceiver receiver = new ReplyReceiver(request, clientSocket, multipleReply, callback);
 		Future<String> future = scheduler.submit(receiver);
 		try {
 			error = future.get(interval * 60 + 4, TimeUnit.SECONDS);
@@ -264,5 +296,10 @@ public class Client {
     	DateTime endDateTime = Encoder.fromStringToDateTime(end);
 		DateTime now = DateTime.now();
 		return endDateTime.minutesFrom(now);
+    }
+    
+    private static String currentFormatTime() {
+    	SimpleDateFormat format = new SimpleDateFormat("E h:m");
+    	return format.format(Calendar.getInstance().getTime());
     }
 }

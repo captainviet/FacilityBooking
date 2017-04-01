@@ -14,7 +14,23 @@ public class ServerSocket {
 	private int port;
 	private String error;
 	private InetAddress clientHost;
+	public InetAddress getClientHost() {
+		return clientHost;
+	}
+
+	public void setClientHost(InetAddress clientHost) {
+		this.clientHost = clientHost;
+	}
+
 	private int clientPort;
+	public int getClientPort() {
+		return clientPort;
+	}
+
+	public void setClientPort(int clientPort) {
+		this.clientPort = clientPort;
+	}
+
 	public String getError() {
 		return error;
 	}
@@ -52,6 +68,15 @@ public class ServerSocket {
 		clearError();
 		byte[] data = Reply.marshal(reply);
 		DatagramPacket packet = new DatagramPacket(data, data.length, clientHost, clientPort);
+		try {
+			socket.send(packet);
+		} catch (IOException ie) {
+			error = ie.getMessage();
+		}
+	}
+	
+	public void sendPacket(DatagramPacket packet) {
+		clearError();
 		try {
 			socket.send(packet);
 		} catch (IOException ie) {

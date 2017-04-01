@@ -21,13 +21,13 @@ public class Request {
     public static final String INVALID = "INVALID";
 	private final static String MESSAGE_END_CODE = "end";
     private static long counter = 0;
-    private String requestType;
-    public String getRequestType() {
-		return requestType;
+    private String type;
+    public String getType() {
+		return type;
 	}
 
-	public void setRequestType(String requestType) {
-		this.requestType = requestType;
+	public void setType(String requestType) {
+		this.type = requestType;
 	}
 
 	private ArrayList<String> payloads;
@@ -51,13 +51,13 @@ public class Request {
     public Request(String clientIp, String requestType, ArrayList<String> payloads) {
         counter++;
         this.id = clientIp + '[' + counter + ']';
-        this.requestType = requestType;
+        this.type = requestType;
         this.payloads = payloads;
     }
 
     public static byte[] marshal(Request request) {
         byte[] idBytes = request.getId().getBytes();
-        byte[] requestTypeBytes = request.getRequestType().getBytes();
+        byte[] requestTypeBytes = request.getType().getBytes();
 
         byte[] data = new byte[ClientSocket.MAX_PACKET_SIZE];
         int cursor = 0;
@@ -84,10 +84,6 @@ public class Request {
         return data;
     }
 
-    public String getType() {
-        return this.requestType;
-    }
-
     public ArrayList<String> getPayloads() {
         return payloads;
     }
@@ -102,7 +98,7 @@ public class Request {
     	cursor += idLength;
     	int typeLength = (int) data[cursor++] & 0xFF;
     	String requestType = new String(Arrays.copyOfRange(data, cursor, typeLength));
-    	request.setRequestType(requestType);
+    	request.setType(requestType);
     	cursor += typeLength;
     	ArrayList<String> payloads = new ArrayList<>();
     	while(payloads.get(payloads.size() - 1).equals(MESSAGE_END_CODE)) {

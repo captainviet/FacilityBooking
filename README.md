@@ -117,3 +117,15 @@ Classes to be shared between server & client
 - Vince
     - Implement database for facilities (D1), bookings (D2)
     - Implement operations for querying (O1), booking (O2), editing (O3)
+    
+## How to Run ##
+- Review Code first and figure out any mistakes, then fixing them or commenting before attempting to run. 
+- Pull And Build project
+- Start server first:
+	java Server server_port invocation_semantics_mode
+	- invocation_semantics_mode : 0 is at most once, 1 is at least once.
+	- a notice of server host and port will be display right after starting.
+- Start a client
+	java Client server_host server_port
+		server_host: must be the host name displayed above
+		server_port: must be the port set up above
