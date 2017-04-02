@@ -121,7 +121,7 @@ public class QueryService {
         if (startDay.compareTo(endDay) == -1) {
             // if the booking spans multiple days, add the booking for start day and end day first
             Booking bS = Booking.placeBooking(confirmationID, start.getTime(), Time.END_OF_DAY);
-            Booking bE = Booking.placeBooking(confirmationID, Time.START_OF_DAY, end.getTime());
+            Booking bE = Booking.placeBooking(confirmationID, Time.START_OF_DAY, end.getTime().addOffset(-1));
             if (bS == null || bE == null) {
                 confirmationID = -1;
             } else {
@@ -158,7 +158,7 @@ public class QueryService {
             }
         } else {
             // else if start day and end day is the same day (illegal argument is unlikely), place a single booking and check for clashes before recording the booking
-            Booking b = Booking.placeBooking(confirmationID, start.getTime(), end.getTime());
+            Booking b = Booking.placeBooking(confirmationID, start.getTime(), end.getTime().addOffset(-1));
             if (b == null) {
                 confirmationID = -1;
             } else {

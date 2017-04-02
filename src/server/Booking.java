@@ -36,11 +36,13 @@ public class Booking extends FreeSlot {
     }
 
     protected static boolean checkBookingExists(int confirmationID) {
-        if (index.containsKey(confirmationID)) return true;
+        if (index.containsKey(confirmationID)) {
+            return true;
+        }
         return false;
     }
 
-    protected static void removeBooking(int confirmationID){
+    protected static void removeBooking(int confirmationID) {
         // already checked before remove so no need to return anything
         index.remove(confirmationID);
     }
