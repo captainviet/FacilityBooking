@@ -54,6 +54,9 @@ public class Server {
     public String receiveAndProcessRequest() {
         String error = null;
         byte[] data = serverSocket.receiveRequest();
+        if (Constant.DEBUG) {
+            System.out.println("\n" + Utils.currentLogFormatTime() + "\t" + new String(data));
+        }
         if (serverSocket.getError() != null) {
             return serverSocket.getError();
         } else {
