@@ -9,12 +9,16 @@ import shared.Request;
 
 public class ReplyReceiver implements Callable<String> {
 	private ClientSocket clientSocket;
-	private boolean multipleReply;
+    private static enum Reply_Mode {
+    	NORMAL,
+    	MONITOR
+    }
+	private Reply_Mode replyReceiveMode;
 	private ICallback callback;
 	private Request request;
 	public ReplyReceiver(Request request, ClientSocket clientSocket, boolean multipleReply, ICallback f) {
 		this.clientSocket = clientSocket;
-		this.multipleReply = multipleReply;
+		this.replyReceiveMode = multipleReply ? Reply_Mode.MONITOR : Reply_Mode.NORMAL;
 		this.callback = f;
 		this.request = request;
 	}
@@ -25,7 +29,7 @@ public class ReplyReceiver implements Callable<String> {
             byte[] data = clientSocket.receiveReply();
             String error = clientSocket.error();
             if (error != null){
-            	if (error == ClientSocket.TIMEOUT) {
+            	if (error.equals(ClientSocket.TIMEOUT)) {
             		System.out.println("Timeout receiving reply. Retransmit request...");
             		clientSocket.sendRequest(request);
             		continue;
@@ -37,12 +41,25 @@ public class ReplyReceiver implements Callable<String> {
                 return clientSocket.error();
                 
             } else {
-                if (multipleReply && reply.getPayloads().get(0).equals(Constant.STOP_MONITOR)) {
-                    break;
-                }
                 callback.handle(reply.getPayloads());
-                if (!multipleReply) {
+                if (replyReceiveMode == Reply_Mode.NORMAL) {
                     break;
+                } else {
+                	while (true) {
+                		data = clientSocket.receiveReply();
+                        error = clientSocket.error();
+                        if (error != null) {
+                        	if (!error.equals(ClientSocket.TIMEOUT)) {
+                        		return error;
+                        	} 
+                        	continue;
+                        }
+                        reply = Reply.unmarshal(data);
+                        callback.handle(reply.getPayloads());
+                        if (reply.getPayloads().get(0).equals(Constant.STOP_MONITOR)) {
+                        	break;
+                        }
+                	}
                 }
             }
         }
