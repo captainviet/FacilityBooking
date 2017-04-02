@@ -22,13 +22,13 @@ public class ReplyReceiver implements Callable<String> {
 		while(true) {
             byte[] data = clientSocket.receiveReply();
             String error = clientSocket.error();
-            if (error != null) {
-            	if (error.equals(ClientSocket.TIMEOUT)) {
-            		return error;
+            if (error != null){
+            	if (error == ClientSocket.TIMEOUT) {
+            		System.out.println("Timeout receiving reply. Retransmit request...");
+            		clientSocket.sendRequest(request);
+            		continue;
             	}
-            	System.out.println("Timeout receiving reply. Retransmit request...");
-            	clientSocket.sendRequest(request);
-            	continue;
+            	return error;
             }
             Reply reply = Reply.unmarshal(data);
             if (reply.statusCode == Reply.ERROR_REPLY_CODE) {

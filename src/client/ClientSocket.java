@@ -43,24 +43,18 @@ public class ClientSocket {
         clearError();
         byte[] data = Request.marshal(request);
 		DatagramPacket packet = new DatagramPacket(data, data.length, serverHost, serverPort);
-        while (true) {
-        	try {
-        		if (!Network.attemptingTransmission()) {
-        	            Thread.sleep(timeout);
-        	            throw new SocketTimeoutException();
-        	    }
-        		socket.send(packet);
-        	} catch (IOException ioe) {
-        		if (ioe instanceof SocketTimeoutException) {
-        			System.out.println("Timeout sending request");
-     	            System.out.println("Retransmissing...");
-        			continue;
-        		}
-        		error = ioe.getMessage();
-        	} catch (InterruptedException ie) {
-        		error = ie.getMessage();
-        	}
-        }
+    	try {
+    		if (!Network.attemptingTransmission()) {
+    			Thread.sleep(timeout);
+    			System.out.println("Timeout transmitting request");
+    		}
+    		System.out.println("Transmitting...");
+    		socket.send(packet);
+    	} catch (IOException ioe) {
+    		error = ioe.getMessage();
+    	} catch (InterruptedException e) {
+			error = e.getMessage();
+		} 
     }
 
     public byte[] receiveReply() {
@@ -69,6 +63,7 @@ public class ClientSocket {
         DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
             socket.receive(packet);
+            System.out.println("Received reply.");
         } catch (IOException e) {
             if (e instanceof SocketTimeoutException) {
                 error = TIMEOUT;
@@ -76,6 +71,7 @@ public class ClientSocket {
                 error = e.getMessage();
             }
         }
+        System.out.println(new String(packet.getData()));
         return packet.getData();
     }
 
