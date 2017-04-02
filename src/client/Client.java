@@ -18,6 +18,7 @@ import shared.FreeSlot;
 import shared.ICallback;
 import shared.Request;
 import shared.Time;
+import shared.Utils;
 
 /**
  * 
@@ -126,10 +127,10 @@ public class Client {
      * @param timeOffset
      * @return
      */
-    public String editBooking(String confirmationID, String editMode, String timeOffset) {
+    public String editBooking(String confirmationId, String editMode, String timeOffset) {
         //    	String[] params = new String[]{confirmationID, editMode, formattedTimeOffset};
         ArrayList<String> params = new ArrayList<>();
-        params.add(confirmationID);
+        params.add(confirmationId);
         params.add(editMode);
         params.add(timeOffset);
         //        Request r = new Request(clientIp, Request.EDIT, (ArrayList<String>) Arrays.asList(params));
@@ -179,14 +180,14 @@ public class Client {
 
     private void handleMonitorFacilityResult(ArrayList<String> payloads) {
     	if (payloads.get(1).equals(Constant.START_MONITOR)) {
-    		System.out.printf("[%s] Start monitoring facility %s\n", currentFormatTime(), payloads.get(0));
+    		System.out.printf("[%s] Start monitoring facility %s\n", Utils.currentLogFormatTime(), payloads.get(0));
     		return;
     	}
     	if (payloads.get(1).equals(Constant.STOP_MONITOR)) {
-    		System.out.printf("[%s] Stop monitoring facility %s\n", currentFormatTime(), payloads.get(0));
+    		System.out.printf("[%s] Stop monitoring facility %s\n", Utils.currentLogFormatTime(), payloads.get(0));
     		return;
     	}
-        System.out.printf("[%s] Available slots on facility %s overweek:\n", currentFormatTime(), payloads.get(0));
+        System.out.printf("[%s] Available slots on facility %s overweek:\n", Utils.currentLogFormatTime(), payloads.get(0));
         payloads.remove(0);
         for (String freeSlotsInDay : payloads) {
             String[] s = freeSlotsInDay.split("\\|");
@@ -228,21 +229,21 @@ public class Client {
 
     /**
      * 
-     * @param date
+     * @param day
      * @return
      */
-    public String getAllAvailableFacilitiesInTimeRange(String date, String startTime, String endTime) {
+    public String getAllAvailableFacilitiesInTimeRange(String day, String startTime, String endTime) {
         String formattedStartTime = formatTimeInput(startTime);
         String formattedEndTime = formatTimeInput(endTime);
         //    	String[] params = new String[]{date, formattedStartTime, formattedEndTime};
         ArrayList<String> params = new ArrayList<>();
-        params.add(date);
+        params.add(day);
         params.add(formattedStartTime);
         params.add(formattedEndTime);
         //        Request r = new Request(clientIp, Request.GET_ALL, (ArrayList<String>) Arrays.asList(params));
         Request r = Request.constructRequest(Request.GET_ALL, params);
         String error = doOperation(r, false, payloads -> {
-            payloads.add(0, date);
+            payloads.add(0, day);
             handleGetAllAvailableFacilities(payloads);
         });
         if (error != null) {
@@ -256,8 +257,8 @@ public class Client {
      * @param payloads
      */
     private void handleGetAllAvailableFacilities(ArrayList<String> payloads) {
-        int date = Integer.parseInt(payloads.remove(0));
-        System.out.printf("All available facilities in %s:\n", DayOfWeek.valueOf(date));
+        int day = Integer.parseInt(payloads.remove(0));
+        System.out.printf("All available facilities in %s:\n", DayOfWeek.valueOf(day));
         for (String freeSlotsByFacility : payloads) {
             String[] s = freeSlotsByFacility.split("\\|");
             String facilityName = s[0];
@@ -346,8 +347,4 @@ public class Client {
         return endDateTime.minutesFrom(now);
     }
 
-    private static String currentFormatTime() {
-        SimpleDateFormat format = new SimpleDateFormat("E h:m");
-        return format.format(Calendar.getInstance().getTime());
-    }
 }
