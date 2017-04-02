@@ -60,7 +60,7 @@ public class Client {
         params.add(facilityName);
         params.add(days);
         //        Request r = new Request(clientIp, Request.QUERY, (ArrayList<String>) Arrays.asList(params));
-        Request r = Request.constructRequest(clientIp, Request.QUERY, params);
+        Request r = Request.constructRequest(Request.QUERY, params);
         String error = doOperation(r, false, payloads -> handleQueryAvailabilityResult(payloads));
         if (error != null) {
             return error;
@@ -102,7 +102,7 @@ public class Client {
         params.add(startFormatted);
         params.add(endFormatted);
         //        Request r = new Request(clientIp, Request.BOOK, (ArrayList<String>) Arrays.asList(params));
-        Request r = Request.constructRequest(clientIp, Request.BOOK, params);
+        Request r = Request.constructRequest(Request.BOOK, params);
         String error = doOperation(r, false, payloads -> {
             handleBookingResult(payloads);
         });
@@ -136,7 +136,7 @@ public class Client {
         params.add(editMode);
         params.add(formattedTimeOffset);
         //        Request r = new Request(clientIp, Request.EDIT, (ArrayList<String>) Arrays.asList(params));
-        Request r = Request.constructRequest(clientIp, Request.EDIT, params);
+        Request r = Request.constructRequest(Request.EDIT, params);
         String error = doOperation(r, false, payloads -> {
             handleEditBookingResult(payloads);
         });
@@ -169,7 +169,7 @@ public class Client {
         params.add(endFormatted);
         params.add(clientIp);
         //        Request r = new Request(clientIp, Request.MONITOR, (ArrayList<String>) Arrays.asList(params));
-        Request r = Request.constructRequest(clientIp, Request.MONITOR, params);
+        Request r = Request.constructRequest(Request.MONITOR, params);
         String error = doOperation(r, true, payloads -> {
             payloads.add(0, facilityName);
             handleMonitorFacilityResult(payloads);
@@ -203,7 +203,7 @@ public class Client {
         //        String[] params = new String[]{confirmationId};
         ArrayList<String> params = new ArrayList<>();
         params.add(confirmationId);
-        Request r = Request.constructRequest(clientIp, Request.CANCEL, params);
+        Request r = Request.constructRequest(Request.CANCEL, params);
         String error = doOperation(r, false, payloads -> {
             handleCancelBookingResult(payloads);
         });
@@ -235,7 +235,7 @@ public class Client {
         params.add(formattedStartTime);
         params.add(formattedEndTime);
         //        Request r = new Request(clientIp, Request.GET_ALL, (ArrayList<String>) Arrays.asList(params));
-        Request r = Request.constructRequest(clientIp, Request.GET_ALL, params);
+        Request r = Request.constructRequest(Request.GET_ALL, params);
         String error = doOperation(r, false, payloads -> {
             payloads.add(0, date);
             handleGetAllAvailableFacilities(payloads);

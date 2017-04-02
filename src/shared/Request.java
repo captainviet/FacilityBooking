@@ -45,10 +45,10 @@ public class Request {
     //        this.id = id;
     //    }
 
-    public static Request constructRequest(String clientIp, String requestType, List<String> payloads) {
+    public static Request constructRequest(String requestType, List<String> payloads) {
         counter++;
-        String id = clientIp + '[' + counter + ']';
-        return new Request(id, requestType, payloads);
+//        String id = clientIp + '[' + counter + ']';
+        return new Request(String.valueOf(counter), requestType, payloads);
     }
 
     private Request(String id, String type, List<String> payloads) {
