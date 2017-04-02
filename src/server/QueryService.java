@@ -123,7 +123,7 @@ public class QueryService {
         return facilitySlots;
     }
 
-    public static long getConfirmationID(Facility facility, DateTime start, DateTime end) {
+    public static int getConfirmationID(Facility facility, DateTime start, DateTime end) {
         int confirmationID = (int) System.currentTimeMillis() >> 16;
         DayOfWeek startDay = start.getDay();
         DayOfWeek endDay = end.getDay();

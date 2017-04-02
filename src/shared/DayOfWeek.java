@@ -41,7 +41,10 @@ public enum DayOfWeek {
         }
         return valueOf(newCode);
     }
-
+    public int getCode() {
+    	return code;
+    }
+    
     public static DayOfWeek valueOf(int code) {
         switch (code) {
         case 0:

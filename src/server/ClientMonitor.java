@@ -1,22 +1,24 @@
 package server;
 
+import java.net.InetAddress;
+
 import shared.DateTime;
 
 public class ClientMonitor {
-    private String ip;
-    private int port;
+    private InetAddress host;
+
+	private int port;
     private String facilityName;
-    private DateTime monitorStart;
     private DateTime monitorEnd;
 
-    public String getIp() {
-        return ip;
-    }
+    public InetAddress getHost() {
+		return host;
+	}
 
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
+	public void setHost(InetAddress host) {
+		this.host = host;
+	}
+	
     public int getPort() {
         return port;
     }
@@ -33,14 +35,6 @@ public class ClientMonitor {
         this.facilityName = facilityName;
     }
 
-    public DateTime getMonitorStart() {
-        return monitorStart;
-    }
-
-    public void setMonitorStart(DateTime monitorStart) {
-        this.monitorStart = monitorStart;
-    }
-
     public DateTime getMonitorEnd() {
         return monitorEnd;
     }
@@ -49,12 +43,26 @@ public class ClientMonitor {
         this.monitorEnd = monitorEnd;
     }
 
-    public ClientMonitor(String ip, int port, String facilityName, DateTime monitorStart, DateTime monitorEnd) {
-        this.ip = ip;
+    public ClientMonitor(InetAddress host, int port, String facilityName, DateTime monitorEnd) {
+        this.host = host;
         this.port = port;
         this.facilityName = facilityName;
-        this.monitorStart = monitorStart;
         this.monitorEnd = monitorEnd;
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+    	if (object == null) {
+    		return false;
+    	}
+    	if (object instanceof ClientMonitor) {
+    		ClientMonitor other = (ClientMonitor) object;
+    		if (this.host == other.getHost() && this.port == other.getPort() 
+    				&& this.facilityName.equals(other.getFacilityName())) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 }
