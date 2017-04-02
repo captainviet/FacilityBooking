@@ -84,14 +84,14 @@ public class MonitoringService {
     private static byte[] getMonitorReply(String facilityName) {
         Facility facility = Facility.getFacilityByName(facilityName);
         ArrayList<String> result = new ArrayList<>();
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 7; i++) {
             StringBuilder resultOneDay = new StringBuilder();
             resultOneDay.append(i).append("|");
             DayOfWeek d = DayOfWeek.valueOf(i);
             List<FreeSlot> freeSlots = QueryService.getAvailableFacility(facility, d);
             for (int j = 0; j < freeSlots.size(); j++) {
-                resultOneDay.append(Encoder.fromFreeSlotToString(freeSlots.get(i)));
-                if (i != freeSlots.size() - 1) {
+                resultOneDay.append(Encoder.fromFreeSlotToString(freeSlots.get(j)));
+                if (j != freeSlots.size() - 1) {
                     resultOneDay.append("|");
                 }
             }
