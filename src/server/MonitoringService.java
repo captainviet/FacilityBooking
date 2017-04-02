@@ -3,6 +3,10 @@ package server;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import shared.Constant;
 import shared.DateTime;
@@ -13,13 +17,28 @@ import shared.Reply;
 
 public class MonitoringService {
     private static ArrayList<ClientMonitor> clients = new ArrayList<>();
-
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
     private MonitoringService() {
 
     }
 
-    public static boolean registerClient(ClientMonitor client) {
+    public static boolean registerClient(ClientMonitor client, ServerSocket serverSocket) {
         clients.add(client);
+        scheduler.schedule(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				byte[] stopMonitorReply = getStopMonitorReply();
+				DatagramPacket packet = new DatagramPacket(stopMonitorReply, stopMonitorReply.length, client.getHost(),
+	                    client.getPort());
+	            serverSocket.sendPacket(packet);
+	            if (serverSocket.error() != null) {
+	                printError(serverSocket.error(), client);
+	            }
+			}
+		}, client.getMonitorEnd().minutesFrom(DateTime.now()), TimeUnit.MINUTES);
         return true;
     }
 
@@ -39,18 +58,8 @@ public class MonitoringService {
                 deregister.add(client);
             }
         }
-        if (!deregister.isEmpty()) {
-            stopMonitorReply = getStopMonitorReply();
-        }
         for (ClientMonitor client : deregister) {
             deregisterClient(client);
-            DatagramPacket packet = new DatagramPacket(stopMonitorReply, stopMonitorReply.length, client.getHost(),
-                    client.getPort());
-            serverSocket.sendPacket(packet);
-            if (serverSocket.error() != null) {
-                printError(serverSocket.error(), client);
-            }
-
         }
         if (!toBeUpdated.isEmpty()) {
             monitorReply = getMonitorReply(facilityName);

@@ -24,7 +24,7 @@ public class ServerSocket {
 	public int getClientPort() {
 		return clientPort;
 	}
-
+	
 	public void setClientPort(int clientPort) {
 		this.clientPort = clientPort;
 	}
