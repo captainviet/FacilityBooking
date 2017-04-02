@@ -10,13 +10,14 @@ import java.net.SocketTimeoutException;
 import shared.Constant;
 import shared.Network;
 import shared.Request;
+import shared.Utils;
 
 /**
  * Created by nhattran on 24/3/17.
  */
 public class ClientSocket {
     public static final String TIMEOUT = "timeout";
-    public static final int timeout = 5000;
+    public static final int timeout = 10000;
     private DatagramSocket socket;
     public static final int MAX_PACKET_SIZE = 32768;
     private String error;
@@ -42,20 +43,19 @@ public class ClientSocket {
 
     public void sendRequest(Request request) {
         clearError();
+        if (!Network.attemptingTransmission()) {
+			return;
+		}
         byte[] data = Request.marshal(request);
 		DatagramPacket packet = new DatagramPacket(data, data.length, serverHost, serverPort);
     	try {
-    		if (!Network.attemptingTransmission()) {
-    			Thread.sleep(timeout);
-    			System.out.println("Timeout transmitting request");
+    		if (Constant.DEBUG) {
+    			System.out.println("\n"  + Utils.currentLogFormatTime() + "\t" + new String(packet.getData()));
     		}
-    		System.out.println("Transmitting...");
     		socket.send(packet);
     	} catch (IOException ioe) {
     		error = ioe.getStackTrace().toString();
-    	} catch (InterruptedException e) {
-			error = e.getStackTrace().toString();
-		} 
+    	}
     }
 
     public byte[] receiveReply() {

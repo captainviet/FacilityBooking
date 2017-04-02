@@ -12,7 +12,7 @@ public class ClientUI {
     private static final String HELP_INTRO = "LIST OF OPERATIONS (day is from 0 to 6 (Monday to Sunday), Format of time is hh:mm) \n";
     private static final String QUERY_AVAILABLE = "Query availability operation: q facility_name day1,day2,...,dayN (N <= 6)\n";
     private static final String BOOKING = "Book a facility: b facility_name start end (format of start, end, is day:time)\n";
-    private static final String EDIT_BOOKING = "Edit a booking: e confirmation_id edit_mode time (edit_mode 0: advance, 1: postpone)\n";
+    private static final String EDIT_BOOKING = "Edit a booking: e confirmation_id edit_mode minutes (edit_mode 0: advance (at most 60 minutes), 1: postpone (atmost 30 minutes)\n";
     private static final String MONITORING = "Monitoring a facility: m facility_name end (end is day:time)\n";
     private static final String GET_ALL_AVAILABLE_IN_TIME_RANGE = "Get all available facilities in time range: g day time_start time_end\n";
     private static final String CANCEL_BOOKING = "Cancel a booking: c confirmation_id\n";
@@ -36,7 +36,7 @@ public class ClientUI {
         while (true) {
             System.out.print(INSTRUCTION);
             operationCmd = br.readLine().split(" ");
-            if (operationCmd[0].equals(Request.HELP)) {
+            if (operationCmd[0].equals(ClientUI.HELP)) {
                 printHelp();
                 continue;
             } else {
@@ -105,5 +105,7 @@ public class ClientUI {
     private static void printError(String operation, String msg) {
         System.out.printf("Operation: %s, Error: %s\n", operation, ErrorCode.getError(msg));
     }
+
+	public static final String HELP = "h";
 
 }

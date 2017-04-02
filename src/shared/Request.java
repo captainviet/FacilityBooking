@@ -8,12 +8,11 @@ import java.util.Scanner;
  * Created by nhattran on 24/3/17.
  */
 public class Request {
-    public static final String HELP = "h";
     public static final String QUERY = "q";
     public static final String BOOK = "b";
     public static final String EDIT = "e";
     public static final String MONITOR = "m";
-    public static final String GET_ALL = "a";
+    public static final String GET_ALL = "g";
     public static final String CANCEL = "c";
     public static final String QUIT = "Q";
     public static final String INVALID = "INVALID";

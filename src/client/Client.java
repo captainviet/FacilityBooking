@@ -127,12 +127,11 @@ public class Client {
      * @return
      */
     public String editBooking(String confirmationID, String editMode, String timeOffset) {
-        String formattedTimeOffset = formatTimeInput(timeOffset);
         //    	String[] params = new String[]{confirmationID, editMode, formattedTimeOffset};
         ArrayList<String> params = new ArrayList<>();
         params.add(confirmationID);
         params.add(editMode);
-        params.add(formattedTimeOffset);
+        params.add(timeOffset);
         //        Request r = new Request(clientIp, Request.EDIT, (ArrayList<String>) Arrays.asList(params));
         Request r = Request.constructRequest(Request.EDIT, params);
         String error = doOperation(r, false, payloads -> {
