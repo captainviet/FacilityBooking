@@ -40,16 +40,26 @@ public class ClientSocket {
     }
 
     public void sendRequest(Request request) {
-        if (!Network.attemptingTransmission()) {
-            return;
-        }
         clearError();
-        try {
-            byte[] data = Request.marshal(request);
-            DatagramPacket packet = new DatagramPacket(data, data.length, serverHost, serverPort);
-            socket.send(packet);
-        } catch (IOException ie) {
-            error = ie.getMessage();
+        byte[] data = Request.marshal(request);
+		DatagramPacket packet = new DatagramPacket(data, data.length, serverHost, serverPort);
+        while (true) {
+        	try {
+        		if (!Network.attemptingTransmission()) {
+        	            Thread.sleep(timeout);
+        	            throw new SocketTimeoutException();
+        	    }
+        		socket.send(packet);
+        	} catch (IOException ioe) {
+        		if (ioe instanceof SocketTimeoutException) {
+        			System.out.println("Timeout sending request");
+     	            System.out.println("Retransmissing...");
+        			continue;
+        		}
+        		error = ioe.getMessage();
+        	} catch (InterruptedException ie) {
+        		error = ie.getMessage();
+        	}
         }
     }
 
