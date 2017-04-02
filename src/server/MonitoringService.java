@@ -7,6 +7,7 @@ import java.util.List;
 import shared.Constant;
 import shared.DateTime;
 import shared.DayOfWeek;
+import shared.Encoder;
 import shared.FreeSlot;
 import shared.Reply;
 
@@ -80,7 +81,7 @@ public class MonitoringService {
             DayOfWeek d = DayOfWeek.valueOf(i);
             List<FreeSlot> freeSlots = QueryService.getAvailableFacility(facility, d);
             for (int j = 0; j < freeSlots.size(); j++) {
-                resultOneDay.append(freeSlots.get(j).toString());
+                resultOneDay.append(Encoder.fromFreeSlotToString(freeSlots.get(i)));
                 if (i != freeSlots.size() - 1) {
                     resultOneDay.append("|");
                 }
