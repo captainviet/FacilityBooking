@@ -48,7 +48,7 @@ public class ClientUI {
                         }
                         break;
                     case Request.BOOK:
-                        error = client.bookFacility(operationCmd[1], operationCmd[2].replace(":", " "), operationCmd[3].replace(":", " "));
+                        error = client.bookFacility(operationCmd[1], operationCmd[2], operationCmd[3]);
                         if (error != null) {
                             printError(Request.BOOK, error);
                         }
