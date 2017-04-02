@@ -56,7 +56,7 @@ public class ReplyReceiver implements Callable<String> {
                         }
                         reply = Reply.unmarshal(data);
                         callback.handle(reply.getPayloads());
-                        if (reply.getPayloads().get(0).equals(Constant.STOP_MONITOR)) {
+                        if (reply.getPayloads().get(1).equals(Constant.STOP_MONITOR)) {
                         	break;
                         }
                 	}
