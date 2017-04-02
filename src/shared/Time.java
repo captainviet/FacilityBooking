@@ -68,16 +68,10 @@ public class Time implements Comparable<Time> {
     public String toString() {
         StringBuilder str = new StringBuilder();
         if (hour <= 9) {
-            if (hour == 0) {
-                str.append('0');
-            }
             str.append('0');
         }
         str.append(hour).append(':');
         if (minute <= 9) {
-            if (minute == 0) {
-                str.append('0');
-            }
             str.append('0');
         }
         str.append(minute);
