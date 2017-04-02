@@ -179,9 +179,8 @@ public class Server {
             DateTime endMonitorDateTime = Encoder.fromStringToDateTime(payloads.get(1));
             ClientMonitor clientMonitor = new ClientMonitor(serverSocket.getClientHost(), serverSocket.getClientPort(),
                     facilityName, endMonitorDateTime);
-            if (!MonitoringService.checkClientMonitorExisted(clientMonitor)) {
-                MonitoringService.registerClient(clientMonitor);
-            }
+            MonitoringService.registerClient(clientMonitor);
+            result.add(Constant.START_MONITOR);
         }
         Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
