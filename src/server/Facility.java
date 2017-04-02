@@ -28,6 +28,15 @@ public class Facility {
         this.name = name;
     }
 
+    public static void initialize() {
+        String LT = "LT";
+        String TR = "TR";
+        for (int i = 1; i <= 10; i++) {
+            addFacility(LT + i);
+            addFacility(TR + i);
+        }
+    }
+
     public String getFacilityName() {
         return this.name;
     }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import shared.Constant;
 import shared.DateTime;
 import shared.DayOfWeek;
 import shared.Encoder;
@@ -48,6 +49,7 @@ public class Server {
     public void start() throws SocketException {
         serverSocket = new ServerSocket(serverPort);
         serverHost = serverSocket.getHost();
+        Facility.initialize();
         System.out.printf("Server listening on host: %s, port: %s\n", serverHost.getHostName(), serverPort);
     }
 
@@ -296,6 +298,10 @@ public class Server {
                 }
                 result.add(resultOneDay.toString());
             }
+        }
+        if (Constant.DEBUG) {
+            System.out.println(hasError);
+            System.out.println(result);
         }
         Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
