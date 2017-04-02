@@ -40,17 +40,22 @@ public class QueryService {
             Collections.sort(booked, new Booking.BookingComparator());
             Booking firstBooking = booked.get(0);
             if (firstBooking != null) {
-                slots.add(FreeSlot.getFreeSlot(Time.START_OF_DAY, firstBooking.getStartTime()));
+                if (firstBooking.getStartTime().compareTo(Time.START_OF_DAY) != 0) {
+                    slots.add(FreeSlot.getFreeSlot(Time.START_OF_DAY, firstBooking.getStartTime()));
+                }
             }
             Booking lastBooking = booked.get(booked.size() - 1);
             if (lastBooking != null) {
-                slots.add(FreeSlot.getFreeSlot(lastBooking.getEndTime(), Time.END_OF_DAY));
+                if (lastBooking.getEndTime().compareTo(Time.END_OF_DAY) != 0) {
+                    slots.add(FreeSlot.getFreeSlot(lastBooking.getEndTime().addOffset(1), Time.END_OF_DAY));
+                }
             }
             int size = booked.size();
             if (size > 1) {
                 // if there's more than one booking, add all the gap between bookings as free slots
                 for (int i = 0; i < size - 1; i++) {
-                    slots.add(FreeSlot.getFreeSlot(booked.get(i).getEndTime(), booked.get(i + 1).getStartTime()));
+                    slots.add(FreeSlot.getFreeSlot(booked.get(i).getEndTime().addOffset(1),
+                            booked.get(i + 1).getStartTime()));
                 }
             }
         }
@@ -118,7 +123,7 @@ public class QueryService {
         int confirmationID = (int) System.currentTimeMillis() >> 16;
         DayOfWeek startDay = start.getDay();
         DayOfWeek endDay = end.getDay();
-        if (startDay.compareTo(endDay) == -1) {
+        if (startDay.compareTo(endDay) < 0) {
             // if the booking spans multiple days, add the booking for start day and end day first
             Booking bS = Booking.placeBooking(confirmationID, start.getTime(), Time.END_OF_DAY);
             Booking bE = Booking.placeBooking(confirmationID, Time.START_OF_DAY, end.getTime().addOffset(-1));
@@ -171,7 +176,9 @@ public class QueryService {
             }
         }
         // add to the booking index the facility associated with this booking
-        Booking.setConfirmationToFacility(confirmationID, facility);
+        if (confirmationID != -1) {
+            Booking.setConfirmationToFacility(confirmationID, facility);
+        }
         return confirmationID;
     }
 
