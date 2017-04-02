@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import shared.Network;
+import shared.Request;
 
 /**
  * Created by nhattran on 24/3/17.
