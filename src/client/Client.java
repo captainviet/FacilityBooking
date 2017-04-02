@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import shared.Constant;
 import shared.DateTime;
 import shared.DayOfWeek;
 import shared.Encoder;
@@ -24,9 +25,6 @@ import shared.Time;
  *
  */
 public class Client {
-    public static final String START_MONITOR = "start_monitor";
-    public static final String STOP_MONITOR = "stop_monitor";
-    public static final String TIME_SERVER = "t_server";
     private final ExecutorService scheduler = Executors.newSingleThreadExecutor();
     private String clientIp;
     private InetAddress serverHost;
@@ -181,7 +179,15 @@ public class Client {
     }
 
     private void handleMonitorFacilityResult(ArrayList<String> payloads) {
-        System.out.printf("[%s] Available on facility %s overweek:\n", currentFormatTime(), payloads.get(0));
+    	if (payloads.get(1).equals(Constant.START_MONITOR)) {
+    		System.out.printf("[%s] Start monitoring facility %s\n", currentFormatTime(), payloads.get(0));
+    		return;
+    	}
+    	if (payloads.get(1).equals(Constant.STOP_MONITOR)) {
+    		System.out.printf("[%s] Stop monitoring facility %s\n", currentFormatTime(), payloads.get(0));
+    		return;
+    	}
+        System.out.printf("[%s] Available slots on facility %s overweek:\n", currentFormatTime(), payloads.get(0));
         payloads.remove(0);
         for (String freeSlotsInDay : payloads) {
             String[] s = freeSlotsInDay.split("|");

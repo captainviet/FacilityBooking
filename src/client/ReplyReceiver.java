@@ -2,6 +2,7 @@ package client;
 
 import java.util.concurrent.Callable;
 
+import shared.Constant;
 import shared.ICallback;
 import shared.Reply;
 import shared.Request;
@@ -36,7 +37,7 @@ public class ReplyReceiver implements Callable<String> {
                 return clientSocket.error();
                 
             } else {
-                if (multipleReply && reply.getPayloads().get(0).equals(Client.STOP_MONITOR)) {
+                if (multipleReply && reply.getPayloads().get(0).equals(Constant.STOP_MONITOR)) {
                     break;
                 }
                 callback.handle(reply.getPayloads());

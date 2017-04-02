@@ -4,7 +4,7 @@ import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.List;
 
-import client.Client;
+import shared.Constant;
 import shared.DateTime;
 import shared.DayOfWeek;
 import shared.FreeSlot;
@@ -66,7 +66,7 @@ public class MonitoringService {
 
     private static byte[] getStopMonitorReply() {
         ArrayList<String> payloads = new ArrayList<>();
-        payloads.add(Client.STOP_MONITOR);
+        payloads.add(Constant.STOP_MONITOR);
         Reply reply = Reply.constructReply(false, payloads);
         return Reply.marshal(reply);
     }
