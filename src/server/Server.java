@@ -58,39 +58,35 @@ public class Server {
             return serverSocket.getError();
         } else {
             Request request = Request.unmarshal(data);
+            String requestKey = serverSocket.getClientHost().getHostAddress() + '[' + request.getId() + ']'; 
             //filtering request if invocation semantic is at most once
-            if (mode == SemanticsMode.AT_MOST_ONCE && replyHistory.containsKey(request.getId())) {
-                ReplyRecord record = replyHistory.get(request.getId());
+            if (mode == SemanticsMode.AT_MOST_ONCE && replyHistory.containsKey(requestKey)) {
+                ReplyRecord record = replyHistory.get(requestKey);
                 error = sendReply(record.getReply());
             } else {
-                error = handleRequest(request);
+                error = handleRequest(request, requestKey);
             }
         }
         return error;
     }
 
-    private String handleRequest(Request request) {
+    private String handleRequest(Request request, String requestKey) {
         switch (request.getType()) {
         case Request.QUERY:
-            return processQueryAvailabilityRequest(request);
+            return processQueryAvailabilityRequest(request, requestKey);
         case Request.BOOK:
-            return processBookingRequest(request);
+            return processBookingRequest(request, requestKey);
         case Request.EDIT:
-            processEditBookingRequest(request);
-            break;
+            return processEditBookingRequest(request, requestKey);
         case Request.MONITOR:
-            processMonitorRequest(request);
-            break;
+            return processMonitorRequest(request, requestKey);
         case Request.CANCEL:
-            processCancelBookingRequest(request);
-            break;
+            return processCancelBookingRequest(request, requestKey);
         case Request.GET_ALL:
-            processGetAllAvailableInTimeRangeRequest(request);
-            break;
+            return processGetAllAvailableInTimeRangeRequest(request, requestKey);
         default:
             return "Invalid_operation";
         }
-        return null;
     }
 
     private void logRequest(String requestId, String requestType, String clientIp, int clientPort) {
@@ -98,7 +94,7 @@ public class Server {
                 Utils.currentLogFormatTime(), requestId, requestType, clientIp, clientPort);
     }
 
-    private String processGetAllAvailableInTimeRangeRequest(Request request) {
+    private String processGetAllAvailableInTimeRangeRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
         List<String> payloads = request.getPayloads();
@@ -125,7 +121,7 @@ public class Server {
             return error;
         }
         if (mode == SemanticsMode.AT_MOST_ONCE) {
-            saveReplyForRequest(reply, request.getId());
+            saveReplyForRequest(reply, requestKey);
         }
         logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
@@ -133,7 +129,7 @@ public class Server {
 
     }
 
-    private String processCancelBookingRequest(Request request) {
+    private String processCancelBookingRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
         List<String> payloads = request.getPayloads();
@@ -158,7 +154,7 @@ public class Server {
             return error;
         }
         if (mode == SemanticsMode.AT_MOST_ONCE) {
-            saveReplyForRequest(reply, request.getId());
+            saveReplyForRequest(reply, requestKey);
         }
         logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
@@ -168,7 +164,7 @@ public class Server {
         return null;
     }
 
-    private String processMonitorRequest(Request request) {
+    private String processMonitorRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
         List<String> payloads = request.getPayloads();
@@ -191,14 +187,14 @@ public class Server {
             return error;
         }
         if (mode == SemanticsMode.AT_MOST_ONCE) {
-            saveReplyForRequest(reply, request.getId());
+            saveReplyForRequest(reply, requestKey);
         }
         logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         return null;
     }
 
-    private String processEditBookingRequest(Request request) {
+    private String processEditBookingRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
         List<String> payloads = request.getPayloads();
@@ -226,7 +222,7 @@ public class Server {
             return error;
         }
         if (mode == SemanticsMode.AT_MOST_ONCE) {
-            saveReplyForRequest(reply, request.getId());
+            saveReplyForRequest(reply, requestKey);
         }
         logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
@@ -236,7 +232,7 @@ public class Server {
         return null;
     }
 
-    private String processBookingRequest(Request request) {
+    private String processBookingRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
         List<String> payloads = request.getPayloads();
@@ -262,7 +258,7 @@ public class Server {
             return error;
         }
         if (mode == SemanticsMode.AT_MOST_ONCE) {
-            saveReplyForRequest(reply, request.getId());
+            saveReplyForRequest(reply, requestKey);
         }
         logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
@@ -272,7 +268,7 @@ public class Server {
         return null;
     }
 
-    private String processQueryAvailabilityRequest(Request request) {
+    private String processQueryAvailabilityRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
         List<String> payloads = request.getPayloads();
@@ -303,17 +299,17 @@ public class Server {
             return error;
         }
         if (mode == SemanticsMode.AT_MOST_ONCE) {
-            saveReplyForRequest(reply, request.getId());
+            saveReplyForRequest(reply, requestKey);
         }
         logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         return null;
     }
 
-    private void saveReplyForRequest(Reply reply, String requestId) {
+    private void saveReplyForRequest(Reply reply, String requestKey) {
         long expired = System.currentTimeMillis() + EXPIRED_DURATION_IN_MILLIS;
-        ReplyRecord record = new ReplyRecord(requestId, expired, reply);
-        replyHistory.put(requestId, record);
+        ReplyRecord record = new ReplyRecord(requestKey, expired, reply);
+        replyHistory.put(requestKey, record);
     }
 
     private String sendReply(Reply reply) {
