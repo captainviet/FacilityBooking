@@ -67,12 +67,18 @@ public class Time implements Comparable<Time> {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        if (hour > 9) {
-            str.append("0");
+        if (hour <= 9) {
+            if (hour == 0) {
+                str.append('0');
+            }
+            str.append('0');
         }
-        str.append(hour).append(":");
-        if (minute > 9) {
-            str.append("0");
+        str.append(hour).append(':');
+        if (minute <= 9) {
+            if (minute == 0) {
+                str.append('0');
+            }
+            str.append('0');
         }
         str.append(minute);
         return str.toString();
