@@ -75,7 +75,7 @@ public class Client {
     private void handleQueryAvailabilityResult(ArrayList<String> freeSlotsInDays) {
         System.out.print("Free Slot:\n");
         for (String freeSlotsInDay : freeSlotsInDays) {
-            String[] s = freeSlotsInDay.split("|");
+            String[] s = freeSlotsInDay.split("\\|");
             DayOfWeek day = DayOfWeek.valueOf(Integer.parseInt(s[0]));
             for (int i = 1; i < s.length; ++i) {
                 FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
@@ -311,16 +311,16 @@ public class Client {
         if (multipleReply) {
             interval = getMonitorInterval(request.getPayloads().get(1));
         } else {
-        	
+
         }
         ReplyReceiver receiver = new ReplyReceiver(request, clientSocket, multipleReply, callback);
         Future<String> future = scheduler.submit(receiver);
         try {
-        	if (multipleReply) {
-        		error = future.get(interval * 60 + 4, TimeUnit.SECONDS);
-        	} else {
-        		error = future.get();
-        	}
+            if (multipleReply) {
+                error = future.get(interval * 60 + 4, TimeUnit.SECONDS);
+            } else {
+                error = future.get();
+            }
         } catch (Exception e) {
             error = e.getMessage();
         }
