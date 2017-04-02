@@ -23,15 +23,6 @@ public class QueryService {
 
     }
 
-    public static void initialize() {
-        String LT = "LT";
-        String TR = "TR";
-        for (int i = 1; i <= 10; i++) {
-            Facility.addFacility(LT + i);
-            Facility.addFacility(TR + i);
-        }
-    }
-
     private enum BookingEditMode {
         ADVANCE,
         POSTPONE
