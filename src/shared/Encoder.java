@@ -3,11 +3,6 @@ package shared;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import shared.DateTime;
-import shared.DayOfWeek;
-import shared.FreeSlot;
-import shared.Time;
-
 /**
  * TODO: Describe purpose and behavior of Encoder
  */
@@ -20,7 +15,7 @@ public class Encoder {
     }
 
     public static String fromDateTimeToString(DateTime dateTime) {
-        StringBuilder str = new StringBuilder().append(dateTime.getDay()).append(" ")
+        StringBuilder str = new StringBuilder().append(dateTime.getDay()).append(Constant.DATETIME_DELIM)
                 .append(fromTimeToString(dateTime.getTime()));
         return str.toString();
     }
@@ -29,8 +24,10 @@ public class Encoder {
         scanner = new Scanner(str);
         DateTime dateTime;
         try {
-            String day = scanner.next();
-            String totalMinutes = scanner.next();
+            String dateTimeStr = scanner.next();
+            String[] dateTimeComponent = dateTimeStr.split(Constant.DATETIME_DELIM);
+            String day = dateTimeComponent[0];
+            String totalMinutes = dateTimeComponent[1];
             dateTime = DateTime.getDateTime(DayOfWeek.valueOf(day), Integer.parseInt(totalMinutes));
         } catch (InputMismatchException e) {
             System.out.println(e.getMessage());

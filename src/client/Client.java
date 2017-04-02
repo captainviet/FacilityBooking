@@ -254,7 +254,7 @@ public class Client {
         int date = Integer.parseInt(payloads.remove(0));
         System.out.printf("All available facilities in %s:\n", DayOfWeek.valueOf(date));
         for (String freeSlotsByFacility : payloads) {
-            String[] s = freeSlotsByFacility.split("|");
+            String[] s = freeSlotsByFacility.split("\\|");
             String facilityName = s[0];
             for (int i = 1; i < s.length; ++i) {
                 FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
