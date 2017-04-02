@@ -109,7 +109,7 @@ public class Server {
             resultOneFacility.append(facility.getFacilityName()).append("|");
             List<FreeSlot> freeSlots = QueryService.getAvailableFacility(facility, day, start, end);
             for (int i = 0; i < freeSlots.size(); i++) {
-                resultOneFacility.append(freeSlots.get(i).toString());
+                resultOneFacility.append(Encoder.fromFreeSlotToString(freeSlots.get(i)));
                 if (i != freeSlots.size() - 1) {
                     resultOneFacility.append("|");
                 }
