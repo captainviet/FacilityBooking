@@ -15,7 +15,7 @@ import shared.Request;
  */
 public class ClientSocket {
     public static final String TIMEOUT = "timeout";
-    public static final int timeout = 10000;
+    public static final int timeout = 5000;
     private DatagramSocket socket;
     public static final int MAX_PACKET_SIZE = 32768;
     private String error;
@@ -51,9 +51,9 @@ public class ClientSocket {
     		System.out.println("Transmitting...");
     		socket.send(packet);
     	} catch (IOException ioe) {
-    		error = ioe.getMessage();
+    		error = ioe.getStackTrace().toString();
     	} catch (InterruptedException e) {
-			error = e.getMessage();
+			error = e.getStackTrace().toString();
 		} 
     }
 
