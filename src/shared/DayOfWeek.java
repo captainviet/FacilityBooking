@@ -13,8 +13,7 @@ public enum DayOfWeek {
     THURSDAY(3),
     FRIDAY(4),
     SATURDAY(5),
-    SUNDAY(6),
-    INVALID(7);
+    SUNDAY(6);
 
     private int code;
 
@@ -41,10 +40,11 @@ public enum DayOfWeek {
         }
         return valueOf(newCode);
     }
+
     public int getCode() {
-    	return code;
+        return code;
     }
-    
+
     public static DayOfWeek valueOf(int code) {
         switch (code) {
         case 0:
@@ -62,7 +62,7 @@ public enum DayOfWeek {
         case 6:
             return DayOfWeek.SUNDAY;
         default:
-            return DayOfWeek.INVALID;
+            return null;
         }
     }
 }
