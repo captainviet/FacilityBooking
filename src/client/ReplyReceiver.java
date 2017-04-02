@@ -15,6 +15,7 @@ public class ReplyReceiver implements Callable<String> {
 		this.clientSocket = clientSocket;
 		this.multipleReply = multipleReply;
 		this.callback = f;
+		this.request = request;
 	}
 	@Override
 	public String call() throws Exception {

@@ -92,7 +92,7 @@ public class Server {
     }
 
     private void logRequest(String requestId, String requestType, String clientIp, int clientPort) {
-        System.out.printf("[%s] Successfully processed request, id: %s, type: %s, client %s:%d",
+        System.out.printf("[%s] Successfully processed request, id: %s, type: %s, client %s:%d\n",
                 Utils.currentLogFormatTime(), requestId, requestType, clientIp, clientPort);
     }
 
