@@ -41,7 +41,7 @@ public class ClientUI {
             } else {
                 switch (operationCmd[0]) {
                     case Request.QUERY:
-                        error = client.queryAvailability(operationCmd[1], operationCmd[2].replace(",",""));
+                        error = client.queryAvailability(operationCmd[1], operationCmd[2]);
                         if (error != null) {
                             printError(Request.QUERY, error);
                         }
