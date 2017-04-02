@@ -179,7 +179,7 @@ public class Server {
             DateTime endMonitorDateTime = Encoder.fromStringToDateTime(payloads.get(1));
             ClientMonitor clientMonitor = new ClientMonitor(serverSocket.getClientHost(), serverSocket.getClientPort(),
                     facilityName, endMonitorDateTime);
-            MonitoringService.registerClient(clientMonitor);
+            MonitoringService.registerClient(clientMonitor, serverSocket);
             result.add(Constant.START_MONITOR);
         }
         Reply reply = Reply.constructReply(hasError, result);
