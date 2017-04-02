@@ -54,7 +54,7 @@ public class Server {
     }
 
     public String receiveAndProcessRequest() {
-        String error;
+        String error = null;
         byte[] data = serverSocket.receiveRequest();
         if (serverSocket.getError() != null) {
             return serverSocket.getError();
@@ -66,7 +66,11 @@ public class Server {
                 ReplyRecord record = replyHistory.get(requestKey);
                 error = sendReply(record.getReply());
             } else {
-                error = handleRequest(request, requestKey);
+                try {
+                	error = handleRequest(request, requestKey);
+                } catch (NullPointerException npe){
+                	npe.printStackTrace();
+                }
             }
         }
         return error;
