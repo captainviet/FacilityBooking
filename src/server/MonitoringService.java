@@ -30,6 +30,7 @@ public class MonitoringService {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+				deregisterClient(client);
 				byte[] stopMonitorReply = getStopMonitorReply();
 				DatagramPacket packet = new DatagramPacket(stopMonitorReply, stopMonitorReply.length, client.getHost(),
 	                    client.getPort());
@@ -44,9 +45,7 @@ public class MonitoringService {
 
     public static void updateClients(String facilityName, ServerSocket serverSocket) {
         byte[] monitorReply = null;
-        byte[] stopMonitorReply = null;
         DateTime now = DateTime.now();
-        ArrayList<ClientMonitor> deregister = new ArrayList<>();
         ArrayList<ClientMonitor> toBeUpdated = new ArrayList<>();
         for (ClientMonitor client : clients) {
             if (client.getMonitorEnd().compareTo(now) >= 0) {
@@ -54,12 +53,7 @@ public class MonitoringService {
                     // send update to the clients
                     toBeUpdated.add(client);
                 }
-            } else {
-                deregister.add(client);
             }
-        }
-        for (ClientMonitor client : deregister) {
-            deregisterClient(client);
         }
         if (!toBeUpdated.isEmpty()) {
             monitorReply = getMonitorReply(facilityName);
@@ -103,15 +97,6 @@ public class MonitoringService {
 
     private static void deregisterClient(ClientMonitor client) {
         clients.remove(client);
-    }
-
-    public static boolean checkClientMonitorExisted(ClientMonitor clientMonitor) {
-        for (ClientMonitor client : clients) {
-            if (client.equals(clientMonitor)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static void printError(String error, ClientMonitor client) {

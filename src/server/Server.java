@@ -284,7 +284,7 @@ public class Server {
             hasError = true;
             result.add(ErrorCode.ERROR_INVALID_FACILITY_NAME.getCode());
         } else {
-            String[] days = payloads.get(1).split(Constant.DATE_DELIM);
+            String[] days = payloads.get(1).split(Constant.DAY_DELIM);
             for (String day : days) {
                 StringBuilder resultOneDay = new StringBuilder();
                 resultOneDay.append(day).append("|");
