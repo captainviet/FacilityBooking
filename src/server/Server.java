@@ -283,7 +283,7 @@ public class Server {
             hasError = true;
             result.add(ERROR_INVALID_FACILITY_NAME);
         } else {
-            String[] days = payloads.get(1).split(" ");
+            String[] days = payloads.get(1).split(Constant.DATE_DELIM);
             for (String day : days) {
                 StringBuilder resultOneDay = new StringBuilder();
                 resultOneDay.append(day).append("|");
