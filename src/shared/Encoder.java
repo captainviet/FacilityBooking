@@ -40,8 +40,8 @@ public class Encoder {
     }
 
     public static String fromFreeSlotToString(FreeSlot freeSlot) {
-        StringBuilder str = new StringBuilder().append(fromTimeToString(freeSlot.getStart())).append(" ")
-                .append(fromTimeToString(freeSlot.getEnd()));
+        StringBuilder str = new StringBuilder().append(fromTimeToString(freeSlot.getStart()))
+                .append(Constant.DATETIME_DELIM).append(fromTimeToString(freeSlot.getEnd()));
         return str.toString();
     }
 
