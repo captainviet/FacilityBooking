@@ -197,6 +197,9 @@ public class QueryService {
         // set mode to either postpone or advance
         BookingEditMode editMode = minute > 0 ? BookingEditMode.POSTPONE : BookingEditMode.ADVANCE;
         Facility facility = Booking.getFacilityBookedByID(confirmationID);
+        if (facility == null) {
+            return false;
+        }
         // get all bookings with the same confirmationID as the parameter
         List<Booking> returnBookings = new ArrayList<>();
         // record the startDay of the group of bookings
