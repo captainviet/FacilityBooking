@@ -190,7 +190,7 @@ public class Client {
         System.out.printf("[%s] Available slots on facility %s overweek:\n", currentFormatTime(), payloads.get(0));
         payloads.remove(0);
         for (String freeSlotsInDay : payloads) {
-            String[] s = freeSlotsInDay.split("|");
+            String[] s = freeSlotsInDay.split("\\|");
             DayOfWeek day = DayOfWeek.valueOf(Integer.parseInt(s[0]));
             for (int i = 1; i < s.length; ++i) {
                 FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);

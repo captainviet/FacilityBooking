@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
+import shared.Constant;
 import shared.Network;
 import shared.Request;
 
@@ -71,7 +72,9 @@ public class ClientSocket {
                 error = e.getMessage();
             }
         }
-        System.out.println(new String(packet.getData()));
+        if (Constant.DEBUG) {
+        	System.out.println(new String(packet.getData()));
+        }
         return packet.getData();
     }
 
