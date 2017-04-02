@@ -125,7 +125,7 @@ public class Server {
         if (mode == SemanticsMode.AT_MOST_ONCE) {
             saveReplyForRequest(reply, requestKey);
         }
-        logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
+        logRequest(requestKey, request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         return null;
 
@@ -158,7 +158,7 @@ public class Server {
         if (mode == SemanticsMode.AT_MOST_ONCE) {
             saveReplyForRequest(reply, requestKey);
         }
-        logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
+        logRequest(requestKey, request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         if (facilityName != null && !hasError) {
             MonitoringService.updateClients(facilityName, serverSocket);
@@ -190,7 +190,7 @@ public class Server {
         if (mode == SemanticsMode.AT_MOST_ONCE) {
             saveReplyForRequest(reply, requestKey);
         }
-        logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
+        logRequest(requestKey, request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         return null;
     }
@@ -225,7 +225,7 @@ public class Server {
         if (mode == SemanticsMode.AT_MOST_ONCE) {
             saveReplyForRequest(reply, requestKey);
         }
-        logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
+        logRequest(requestKey, request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         if (facilityName != null && !hasError) {
             MonitoringService.updateClients(facilityName, serverSocket);
@@ -261,7 +261,7 @@ public class Server {
         if (mode == SemanticsMode.AT_MOST_ONCE) {
             saveReplyForRequest(reply, requestKey);
         }
-        logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
+        logRequest(requestKey, request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         if (!hasError) {
             MonitoringService.updateClients(facilityName, serverSocket);
@@ -306,7 +306,7 @@ public class Server {
         if (mode == SemanticsMode.AT_MOST_ONCE) {
             saveReplyForRequest(reply, requestKey);
         }
-        logRequest(request.getId(), request.getType(), serverSocket.getClientHost().getHostAddress(),
+        logRequest(requestKey, request.getType(), serverSocket.getClientHost().getHostAddress(),
                 serverSocket.getClientPort());
         return null;
     }
