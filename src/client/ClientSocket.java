@@ -64,7 +64,9 @@ public class ClientSocket {
         DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
             socket.receive(packet);
-            System.out.println("Received reply.");
+            if (Constant.DEBUG) {
+            	System.out.println("Received reply.");
+            }
         } catch (IOException e) {
             if (e instanceof SocketTimeoutException) {
                 error = TIMEOUT;
@@ -72,7 +74,7 @@ public class ClientSocket {
                 error = e.getMessage();
             }
         }
-        if (Constant.DEBUG) {
+        if (Constant.DEBUG && error == null) {
         	System.out.println(new String(packet.getData()));
         }
         return packet.getData();
