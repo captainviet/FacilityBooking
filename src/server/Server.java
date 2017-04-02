@@ -10,6 +10,7 @@ import shared.Constant;
 import shared.DateTime;
 import shared.DayOfWeek;
 import shared.Encoder;
+import shared.ErrorCode;
 import shared.FreeSlot;
 import shared.Network;
 import shared.Reply;
@@ -21,9 +22,6 @@ import shared.Utils;
  * TODO: Describe purpose and behavior of Server
  */
 public class Server {
-    private final static String ERROR_INVALID_FACILITY_NAME = "Invalid facility name";
-    private final static String ERROR_BOOKING_CLASHED = "Booking time clashed";
-    private final static String ERROR_BOOKING_NOT_EXIST = "Booking does not exist";
     private final static long EXPIRED_DURATION_IN_MILLIS = 3600000;
 
     private enum SemanticsMode {
@@ -67,9 +65,9 @@ public class Server {
                 error = sendReply(record.getReply());
             } else {
                 try {
-                	error = handleRequest(request, requestKey);
-                } catch (NullPointerException npe){
-                	npe.printStackTrace();
+                    error = handleRequest(request, requestKey);
+                } catch (NullPointerException npe) {
+                    npe.printStackTrace();
                 }
             }
         }
@@ -143,13 +141,13 @@ public class Server {
         String facilityName = null;
         if (!Booking.checkBookingExists(confirmationId)) {
             hasError = true;
-            result.add(ERROR_BOOKING_NOT_EXIST);
+            result.add(ErrorCode.ERROR_BOOKING_NOT_EXIST.getCode());
         } else {
             facilityName = Booking.getFacilityBookedByID(confirmationId).getFacilityName();
             boolean canCancel = QueryService.cancelBookedConfirmation(confirmationId);
             if (!canCancel) {
                 hasError = true;
-                result.add(ERROR_BOOKING_CLASHED);
+                result.add(ErrorCode.ERROR_BOOKING_CLASHED.getCode());
             } else {
                 result.add(String.valueOf(confirmationId));
             }
@@ -178,7 +176,7 @@ public class Server {
         Facility facility = Facility.getFacilityByName(facilityName);
         if (facility == null) {
             hasError = true;
-            result.add(ERROR_INVALID_FACILITY_NAME);
+            result.add(ErrorCode.ERROR_INVALID_FACILITY_NAME.getCode());
         } else {
             DateTime endMonitorDateTime = Encoder.fromStringToDateTime(payloads.get(1));
             ClientMonitor clientMonitor = new ClientMonitor(serverSocket.getClientHost(), serverSocket.getClientPort(),
@@ -210,13 +208,13 @@ public class Server {
         String facilityName = null;
         if (!Booking.checkBookingExists(confirmationId)) {
             hasError = true;
-            result.add(ERROR_BOOKING_NOT_EXIST);
+            result.add(ErrorCode.ERROR_BOOKING_NOT_EXIST.getCode());
         } else {
             facilityName = Booking.getFacilityBookedByID(confirmationId).getFacilityName();
             boolean canEdit = QueryService.editBookedConfirmation(confirmationId, timeOffset);
             if (!canEdit) {
                 hasError = true;
-                result.add(ERROR_BOOKING_CLASHED);
+                result.add(ErrorCode.ERROR_BOOKING_CLASHED.getCode());
             } else {
                 result.add(String.valueOf(confirmationId));
             }
@@ -245,14 +243,14 @@ public class Server {
         Facility facility = Facility.getFacilityByName(facilityName);
         if (facility == null) {
             hasError = true;
-            result.add(ERROR_INVALID_FACILITY_NAME);
+            result.add(ErrorCode.ERROR_INVALID_FACILITY_NAME.getCode());
         } else {
             DateTime start = Encoder.fromStringToDateTime(payloads.get(1));
             DateTime end = Encoder.fromStringToDateTime(payloads.get(2));
             long confirmationId = QueryService.getConfirmationID(facility, start, end);
             if (confirmationId == -1) {
                 hasError = true;
-                result.add(ERROR_BOOKING_CLASHED);
+                result.add(ErrorCode.ERROR_BOOKING_CLASHED.getCode());
             } else {
                 result.add(String.valueOf(confirmationId));
             }
@@ -281,7 +279,7 @@ public class Server {
         Facility facility = Facility.getFacilityByName(facilityName);
         if (facility == null) {
             hasError = true;
-            result.add(ERROR_INVALID_FACILITY_NAME);
+            result.add(ErrorCode.ERROR_INVALID_FACILITY_NAME.getCode());
         } else {
             String[] days = payloads.get(1).split(Constant.DATE_DELIM);
             for (String day : days) {
