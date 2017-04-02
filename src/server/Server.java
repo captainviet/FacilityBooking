@@ -60,7 +60,7 @@ public class Server {
             return serverSocket.getError();
         } else {
             Request request = Request.unmarshal(data);
-            String requestKey = serverSocket.getClientHost().getHostAddress() + '[' + request.getId() + ']'; 
+            String requestKey = serverSocket.getClientHost().getHostAddress() + '[' + request.getId() + ']';
             //filtering request if invocation semantic is at most once
             if (mode == SemanticsMode.AT_MOST_ONCE && replyHistory.containsKey(requestKey)) {
                 ReplyRecord record = replyHistory.get(requestKey);
@@ -320,7 +320,13 @@ public class Server {
 
     private String sendReply(Reply reply) {
         if (!Network.attemptingTransmission()) {
+            if (Constant.DEBUG) {
+                System.out.println("Reply Loss!");
+            }
             return null;
+        }
+        if (Constant.DEBUG) {
+            System.out.println("Reply Sent!");
         }
         serverSocket.sendReply(reply);
         if (serverSocket.getError() != null) {
