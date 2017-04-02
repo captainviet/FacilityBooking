@@ -49,8 +49,10 @@ public class Encoder {
         scanner = new Scanner(str);
         FreeSlot freeSlot;
         try {
-            int startTotal = scanner.nextInt();
-            int endTotal = scanner.nextInt();
+            String freeSlotStr = scanner.next();
+            String[] freeSlotComponent = freeSlotStr.split(Constant.DATETIME_DELIM);
+            int startTotal = Integer.parseInt(freeSlotComponent[0]);
+            int endTotal = Integer.parseInt(freeSlotComponent[1]);
             freeSlot = FreeSlot.getFreeSlot(Time.getTimeByTotal(startTotal), Time.getTimeByTotal(endTotal));
         } catch (InputMismatchException e) {
             System.out.println(e.getMessage());
