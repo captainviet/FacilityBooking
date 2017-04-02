@@ -310,11 +310,17 @@ public class Client {
 
         if (multipleReply) {
             interval = getMonitorInterval(request.getPayloads().get(1));
+        } else {
+        	
         }
         ReplyReceiver receiver = new ReplyReceiver(request, clientSocket, multipleReply, callback);
         Future<String> future = scheduler.submit(receiver);
         try {
-            error = future.get(interval * 60 + 4, TimeUnit.SECONDS);
+        	if (multipleReply) {
+        		error = future.get(interval * 60 + 4, TimeUnit.SECONDS);
+        	} else {
+        		error = future.get();
+        	}
         } catch (Exception e) {
             error = e.getMessage();
         }
