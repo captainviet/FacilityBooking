@@ -3,6 +3,8 @@ package client;
 import java.util.concurrent.Callable;
 
 import shared.ICallback;
+import shared.Reply;
+import shared.Request;
 
 public class ReplyReceiver implements Callable<String> {
 	private ClientSocket clientSocket;

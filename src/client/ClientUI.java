@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import shared.Request;
+
 public class ClientUI {
 	private static final String INSTRUCTION = "Input your operation or h for help:\n";
     private static final String HELP_INTRO = "LIST OF OPERATIONS (day is from 0 to 6 (Monday to Sunday), Format of time is hh:mm) \n";

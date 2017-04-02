@@ -1,29 +1,22 @@
 package client;
 
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import shared.DateTime;
 import shared.DayOfWeek;
 import shared.Encoder;
 import shared.FreeSlot;
 import shared.ICallback;
+import shared.Request;
 import shared.Time;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * 
@@ -46,14 +39,15 @@ public class Client {
      * @param serverPort
      */
     public Client(InetAddress serverHost, int serverPort) {
-    	this.serverHost = serverHost;
-    	this.serverPort = serverPort;
+        this.serverHost = serverHost;
+        this.serverPort = serverPort;
     }
 
     public void start() throws SocketException {
-    	clientSocket = new ClientSocket(serverHost, serverPort);
-    	clientIp = clientSocket.getIp();
+        clientSocket = new ClientSocket(serverHost, serverPort);
+        clientIp = clientSocket.getIp();
     }
+
     /**
      * Return the error when querying for available slots of a facility in one or multiple days. Print all slots and return null if no error.
      * @param facilityName the facility name to be queried for available slot in days.
@@ -61,14 +55,16 @@ public class Client {
      * @return the string error of query operation
      */
     public String queryAvailability(String facilityName, String days) {
-//    	String[] params = new String[]{facilityName, days};
-    	ArrayList<String> params = new ArrayList<>();
-    	params.add(facilityName);
-    	params.add(days);
-//        Request r = new Request(clientIp, Request.QUERY, (ArrayList<String>) Arrays.asList(params));
-        Request r = new Request(clientIp, Request.QUERY, params);
+        //    	String[] params = new String[]{facilityName, days};
+        ArrayList<String> params = new ArrayList<>();
+        params.add(facilityName);
+        params.add(days);
+        //        Request r = new Request(clientIp, Request.QUERY, (ArrayList<String>) Arrays.asList(params));
+        Request r = Request.constructRequest(clientIp, Request.QUERY, params);
         String error = doOperation(r, false, payloads -> handleQueryAvailabilityResult(payloads));
-        if (error != null) { return error; }
+        if (error != null) {
+            return error;
+        }
         return null;
     }
 
@@ -79,11 +75,12 @@ public class Client {
     private void handleQueryAvailabilityResult(ArrayList<String> freeSlotsInDays) {
         System.out.print("Free Slot:\n");
         for (String freeSlotsInDay : freeSlotsInDays) {
-            String[] s  = freeSlotsInDay.split("|");
+            String[] s = freeSlotsInDay.split("|");
             DayOfWeek day = DayOfWeek.valueOf(Integer.parseInt(s[0]));
             for (int i = 1; i < s.length; ++i) {
-            	FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
-            	System.out.printf("%s: from %s to %s\n", day, freeSlot.getStart().toString(), freeSlot.getEnd().toString());
+                FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
+                System.out.printf("%s: from %s to %s\n", day, freeSlot.getStart().toString(),
+                        freeSlot.getEnd().toString());
             }
         }
     }
@@ -97,19 +94,21 @@ public class Client {
      * @return the string error of booking operation with given input.
      */
     public String bookFacility(String facilityName, String start, String end) {
-        String startFormatted  = formatDateTimeInput(start);
-        String endFormatted  = formatDateTimeInput(end);
-//        String[] params = {facilityName, startFormatted, endFormatted};
+        String startFormatted = formatDateTimeInput(start);
+        String endFormatted = formatDateTimeInput(end);
+        //        String[] params = {facilityName, startFormatted, endFormatted};
         ArrayList<String> params = new ArrayList<>();
         params.add(facilityName);
         params.add(startFormatted);
         params.add(endFormatted);
-//        Request r = new Request(clientIp, Request.BOOK, (ArrayList<String>) Arrays.asList(params));
-        Request r = new Request(clientIp, Request.BOOK, params);
+        //        Request r = new Request(clientIp, Request.BOOK, (ArrayList<String>) Arrays.asList(params));
+        Request r = Request.constructRequest(clientIp, Request.BOOK, params);
         String error = doOperation(r, false, payloads -> {
             handleBookingResult(payloads);
         });
-        if (error != null) { return error; }
+        if (error != null) {
+            return error;
+        }
         return null;
     }
 
@@ -130,18 +129,20 @@ public class Client {
      * @return
      */
     public String editBooking(String confirmationID, String editMode, String timeOffset) {
-    	String formattedTimeOffset = formatTimeInput(timeOffset);
-//    	String[] params = new String[]{confirmationID, editMode, formattedTimeOffset};
-    	ArrayList<String> params = new ArrayList<>();
+        String formattedTimeOffset = formatTimeInput(timeOffset);
+        //    	String[] params = new String[]{confirmationID, editMode, formattedTimeOffset};
+        ArrayList<String> params = new ArrayList<>();
         params.add(confirmationID);
         params.add(editMode);
         params.add(formattedTimeOffset);
-//        Request r = new Request(clientIp, Request.EDIT, (ArrayList<String>) Arrays.asList(params));
-        Request r = new Request(clientIp, Request.EDIT, params);
+        //        Request r = new Request(clientIp, Request.EDIT, (ArrayList<String>) Arrays.asList(params));
+        Request r = Request.constructRequest(clientIp, Request.EDIT, params);
         String error = doOperation(r, false, payloads -> {
             handleEditBookingResult(payloads);
         });
-        if (error != null) { return error; }
+        if (error != null) {
+            return error;
+        }
         return null;
     }
 
@@ -153,7 +154,7 @@ public class Client {
         String confirmationId = payloads.get(0);
         System.out.printf("Edit booking %s success\n", confirmationId);
     }
-    
+
     /**
      * 
      * @param facilityName
@@ -161,19 +162,21 @@ public class Client {
      * @return
      */
     public String monitorFacility(String facilityName, String endDateTime) {
-    	String endFormatted  = formatDateTimeInput(endDateTime);
-//    	String[] params = new String[]{facilityName, endFormatted, clientIp};
-    	ArrayList<String> params = new ArrayList<>();
+        String endFormatted = formatDateTimeInput(endDateTime);
+        //    	String[] params = new String[]{facilityName, endFormatted, clientIp};
+        ArrayList<String> params = new ArrayList<>();
         params.add(facilityName);
         params.add(endFormatted);
         params.add(clientIp);
-//        Request r = new Request(clientIp, Request.MONITOR, (ArrayList<String>) Arrays.asList(params));
-        Request r = new Request(clientIp, Request.MONITOR, params);
+        //        Request r = new Request(clientIp, Request.MONITOR, (ArrayList<String>) Arrays.asList(params));
+        Request r = Request.constructRequest(clientIp, Request.MONITOR, params);
         String error = doOperation(r, true, payloads -> {
-        	payloads.add(0, facilityName);
+            payloads.add(0, facilityName);
             handleMonitorFacilityResult(payloads);
         });
-        if (error != null) { return error; }
+        if (error != null) {
+            return error;
+        }
         return null;
     }
 
@@ -181,11 +184,12 @@ public class Client {
         System.out.printf("[%s] Available on facility %s overweek:\n", currentFormatTime(), payloads.get(0));
         payloads.remove(0);
         for (String freeSlotsInDay : payloads) {
-            String[] s  = freeSlotsInDay.split("|");
+            String[] s = freeSlotsInDay.split("|");
             DayOfWeek day = DayOfWeek.valueOf(Integer.parseInt(s[0]));
             for (int i = 1; i < s.length; ++i) {
-            	FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
-            	System.out.printf("%s: from %s to %s\n", day, freeSlot.getStart().toString(), freeSlot.getEnd().toString());
+                FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
+                System.out.printf("%s: from %s to %s\n", day, freeSlot.getStart().toString(),
+                        freeSlot.getEnd().toString());
             }
         }
     }
@@ -196,61 +200,66 @@ public class Client {
      * @return
      */
     public String cancelBooking(String confirmationId) {
-//        String[] params = new String[]{confirmationId};
+        //        String[] params = new String[]{confirmationId};
         ArrayList<String> params = new ArrayList<>();
         params.add(confirmationId);
-    	Request r = new Request(clientIp, Request.CANCEL, params);
-    	String error = doOperation(r, false, payloads -> {
-    		handleCancelBookingResult(payloads);
-    	});
-    	if (error != null) { return error; }
-    	return null;
+        Request r = Request.constructRequest(clientIp, Request.CANCEL, params);
+        String error = doOperation(r, false, payloads -> {
+            handleCancelBookingResult(payloads);
+        });
+        if (error != null) {
+            return error;
+        }
+        return null;
     }
-    
+
     /**
      * 
      * @param payloads
      */
     private void handleCancelBookingResult(ArrayList<String> payloads) {
-    	System.out.printf("Cancel booking %s success\n", payloads.get(0));
+        System.out.printf("Cancel booking %s success\n", payloads.get(0));
     }
-    
+
     /**
      * 
      * @param date
      * @return
      */
     public String getAllAvailableFacilitiesInTimeRange(String date, String startTime, String endTime) {
-    	String formattedStartTime = formatTimeInput(startTime);
-    	String formattedEndTime = formatTimeInput(endTime);
-//    	String[] params = new String[]{date, formattedStartTime, formattedEndTime};
+        String formattedStartTime = formatTimeInput(startTime);
+        String formattedEndTime = formatTimeInput(endTime);
+        //    	String[] params = new String[]{date, formattedStartTime, formattedEndTime};
         ArrayList<String> params = new ArrayList<>();
         params.add(date);
         params.add(formattedStartTime);
         params.add(formattedEndTime);
-//        Request r = new Request(clientIp, Request.GET_ALL, (ArrayList<String>) Arrays.asList(params));
-        Request r = new Request(clientIp, Request.GET_ALL, params);
-    	String error = doOperation(r, false, payloads -> {
-    		payloads.add(0, date);
-    		handleGetAllAvailableFacilities(payloads);
-    	});
-    	if (error != null) { return error; }
-    	return null;
+        //        Request r = new Request(clientIp, Request.GET_ALL, (ArrayList<String>) Arrays.asList(params));
+        Request r = Request.constructRequest(clientIp, Request.GET_ALL, params);
+        String error = doOperation(r, false, payloads -> {
+            payloads.add(0, date);
+            handleGetAllAvailableFacilities(payloads);
+        });
+        if (error != null) {
+            return error;
+        }
+        return null;
     }
-    
+
     /**
      * 
      * @param payloads
      */
     private void handleGetAllAvailableFacilities(ArrayList<String> payloads) {
-    	int date = Integer.parseInt(payloads.remove(0));
-    	System.out.printf("All available facilities in %s:\n", DayOfWeek.valueOf(date));
-    	for (String freeSlotsByFacility : payloads) {
-            String[] s  = freeSlotsByFacility.split("|");
+        int date = Integer.parseInt(payloads.remove(0));
+        System.out.printf("All available facilities in %s:\n", DayOfWeek.valueOf(date));
+        for (String freeSlotsByFacility : payloads) {
+            String[] s = freeSlotsByFacility.split("|");
             String facilityName = s[0];
             for (int i = 1; i < s.length; ++i) {
-            	FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
-            	System.out.printf("Facility %s: from %s to %s\n", facilityName, freeSlot.getStart().toString(), freeSlot.getEnd().toString());
+                FreeSlot freeSlot = Encoder.fromStringToFreeSlot(s[i]);
+                System.out.printf("Facility %s: from %s to %s\n", facilityName, freeSlot.getStart().toString(),
+                        freeSlot.getEnd().toString());
             }
         }
     }
@@ -269,20 +278,20 @@ public class Client {
         DateTime dt = DateTime.getDateTime(DayOfWeek.valueOf(day), tTime.getTotalMinutes());
         return Encoder.fromDateTimeToString(dt);
     }
-    
+
     /**
      * 
      * @param time
      * @return
      */
     private String formatTimeInput(String time) {
-    	String[] timeSplit = time.split(":");
-    	int hour = Integer.parseInt(timeSplit[0]);
+        String[] timeSplit = time.split(":");
+        int hour = Integer.parseInt(timeSplit[0]);
         int minute = Integer.parseInt(timeSplit[1]);
         Time tTime = Time.getTime(hour, minute);
         return Encoder.fromTimeToString(tTime);
     }
-    
+
     /**
      * Create a socket and send request to remote server, then wait to receive the reply and unmarshal it to get the payloads.
      * Return an OperationResult with two field error and payloads. If error is not null, payloads is null.
@@ -292,40 +301,42 @@ public class Client {
      * @return
      */
     private String doOperation(Request request, boolean multipleReply, ICallback callback) {
-    	String error;
-    	clientSocket.sendRequest(request);
+        String error;
+        clientSocket.sendRequest(request);
         if (clientSocket.error() != null) {
             return clientSocket.error();
         }
         long interval = 30;
-        
-		if (multipleReply) {
-			interval = getMonitorInterval(request.getPayloads().get(1));
-		}
-		ReplyReceiver receiver = new ReplyReceiver(request, clientSocket, multipleReply, callback);
-		Future<String> future = scheduler.submit(receiver);
-		try {
-			error = future.get(interval * 60 + 4, TimeUnit.SECONDS);
-		} catch (Exception e) {
-			error = e.getMessage();
-		}
-        if (error != null) { return error; }
+
+        if (multipleReply) {
+            interval = getMonitorInterval(request.getPayloads().get(1));
+        }
+        ReplyReceiver receiver = new ReplyReceiver(request, clientSocket, multipleReply, callback);
+        Future<String> future = scheduler.submit(receiver);
+        try {
+            error = future.get(interval * 60 + 4, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            error = e.getMessage();
+        }
+        if (error != null) {
+            return error;
+        }
         return null;
     }
-    
+
     /**
      * 
      * @param end
      * @return
      */
     private static long getMonitorInterval(String end) {
-    	DateTime endDateTime = Encoder.fromStringToDateTime(end);
-		DateTime now = DateTime.now();
-		return endDateTime.minutesFrom(now);
+        DateTime endDateTime = Encoder.fromStringToDateTime(end);
+        DateTime now = DateTime.now();
+        return endDateTime.minutesFrom(now);
     }
-    
+
     private static String currentFormatTime() {
-    	SimpleDateFormat format = new SimpleDateFormat("E h:m");
-    	return format.format(Calendar.getInstance().getTime());
+        SimpleDateFormat format = new SimpleDateFormat("E h:m");
+        return format.format(Calendar.getInstance().getTime());
     }
 }

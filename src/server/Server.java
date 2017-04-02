@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import client.Reply;
-import client.Request;
 import shared.DateTime;
 import shared.DayOfWeek;
 import shared.Encoder;
 import shared.FreeSlot;
 import shared.Network;
+import shared.Reply;
+import shared.Request;
 import shared.Time;
 import shared.Utils;
 
@@ -99,9 +99,9 @@ public class Server {
     }
 
     private String processGetAllAvailableInTimeRangeRequest(Request request) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         boolean hasError = false;
-        ArrayList<String> payloads = request.getPayloads();
+        List<String> payloads = request.getPayloads();
         DayOfWeek day = DayOfWeek.valueOf(Integer.parseInt(payloads.get(0)));
         Time start = Encoder.fromStringToTime(payloads.get(1));
         Time end = Encoder.fromStringToTime(payloads.get(2));
@@ -119,7 +119,7 @@ public class Server {
             result.add(resultOneFacility.toString());
         }
 
-        Reply reply = new Reply(hasError, result);
+        Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
         if (error != null) {
             return error;
@@ -134,9 +134,9 @@ public class Server {
     }
 
     private String processCancelBookingRequest(Request request) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         boolean hasError = false;
-        ArrayList<String> payloads = request.getPayloads();
+        List<String> payloads = request.getPayloads();
         int confirmationId = Integer.parseInt(payloads.get(0));
         String facilityName = null;
         if (!Booking.checkBookingExists(confirmationId)) {
@@ -152,7 +152,7 @@ public class Server {
                 result.add(String.valueOf(confirmationId));
             }
         }
-        Reply reply = new Reply(hasError, result);
+        Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
         if (error != null) {
             return error;
@@ -169,9 +169,9 @@ public class Server {
     }
 
     private String processMonitorRequest(Request request) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         boolean hasError = false;
-        ArrayList<String> payloads = request.getPayloads();
+        List<String> payloads = request.getPayloads();
         String facilityName = payloads.get(0);
         Facility facility = Facility.getFacilityByName(facilityName);
         if (facility == null) {
@@ -185,7 +185,7 @@ public class Server {
                 MonitoringService.registerClient(clientMonitor);
             }
         }
-        Reply reply = new Reply(hasError, result);
+        Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
         if (error != null) {
             return error;
@@ -199,9 +199,9 @@ public class Server {
     }
 
     private String processEditBookingRequest(Request request) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         boolean hasError = false;
-        ArrayList<String> payloads = request.getPayloads();
+        List<String> payloads = request.getPayloads();
         int confirmationId = Integer.parseInt(payloads.get(0));
         int editMode = Integer.parseInt(payloads.get(1));
         int timeOffset = Integer.parseInt(payloads.get(2));
@@ -220,7 +220,7 @@ public class Server {
                 result.add(String.valueOf(confirmationId));
             }
         }
-        Reply reply = new Reply(hasError, result);
+        Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
         if (error != null) {
             return error;
@@ -237,9 +237,9 @@ public class Server {
     }
 
     private String processBookingRequest(Request request) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         boolean hasError = false;
-        ArrayList<String> payloads = request.getPayloads();
+        List<String> payloads = request.getPayloads();
         String facilityName = payloads.get(0);
         Facility facility = Facility.getFacilityByName(facilityName);
         if (facility == null) {
@@ -256,7 +256,7 @@ public class Server {
                 result.add(String.valueOf(confirmationId));
             }
         }
-        Reply reply = new Reply(hasError, result);
+        Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
         if (error != null) {
             return error;
@@ -273,9 +273,9 @@ public class Server {
     }
 
     private String processQueryAvailabilityRequest(Request request) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         boolean hasError = false;
-        ArrayList<String> payloads = request.getPayloads();
+        List<String> payloads = request.getPayloads();
         String facilityName = payloads.get(0);
         Facility facility = Facility.getFacilityByName(facilityName);
         if (facility == null) {
@@ -297,7 +297,7 @@ public class Server {
                 result.add(resultOneDay.toString());
             }
         }
-        Reply reply = new Reply(hasError, result);
+        Reply reply = Reply.constructReply(hasError, result);
         String error = sendReply(reply);
         if (error != null) {
             return error;

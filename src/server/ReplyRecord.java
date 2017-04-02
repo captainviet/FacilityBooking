@@ -1,6 +1,6 @@
 package server;
 
-import client.Reply;
+import shared.Reply;
 
 public class ReplyRecord {
 	private String requestId;
