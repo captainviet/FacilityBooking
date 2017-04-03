@@ -2,9 +2,7 @@ package client;
 
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -48,7 +46,9 @@ public class Client {
     }
 
     /**
-     * Return the error when querying for available slots of a facility in one or multiple days. Print all slots and return null if no error.
+     * Query the availability of a facility named facilityName over selection of one or multiple days. 
+     * Return a null String if no error, else return a string error message.
+     * Success reply’s payloads are handled by handleQueryAvailabilityResult.
      * @param facilityName the facility name to be queried for available slot in days.
      * @param days the list of day to be queried for available slot of the facility with name facilityName.
      * @return the string error of query operation
@@ -68,7 +68,7 @@ public class Client {
     }
 
     /**
-     *
+     * Handle the successful reply’s payloads of queryAvailability function.
      * @param freeSlotsInDays
      */
     private void handleQueryAvailabilityResult(ArrayList<String> freeSlotsInDays) {
@@ -85,8 +85,9 @@ public class Client {
     }
 
     /**
-     * Return the error when booking for a facility with time slot (start, end) (inclusive). Print the confirmation id and
-     * return null if no error.
+     * Book a facility named facilityNamed with start DateTime and end DateTime. 
+     * Return a null String if no error, else return a string error message. 
+     * Success reply’s payloads are handled by handleBookingResult.
      * @param facilityName the facility name to be booked with slot start and end
      * @param start the start time of booking slot
      * @param end the end time of booking slot
@@ -121,7 +122,10 @@ public class Client {
     }
 
     /**
-     * 
+     * Edit a booking with confirmationId, advance (editMode=0, at most 1 hour), or postpone (editMode=1, at most 30 minutes), 
+     * with timeOffset minutes. 
+     * Return a null String if no error, else return a string error message. 
+     * Success reply’s payloads are handled by handleEditBookingResult.
      * @param confirmationID
      * @param editMode
      * @param timeOffset
@@ -145,7 +149,7 @@ public class Client {
     }
 
     /**
-     *
+     * Handle the successful reply’s payloads of editBooking function, which contains confirmationId.
      * @param payloads
      */
     private void handleEditBookingResult(ArrayList<String> payloads) {
@@ -154,7 +158,9 @@ public class Client {
     }
 
     /**
-     * 
+     * Monitor a facility named facilityName until endDateTime. 
+     * Return a null String if no error, else return a string error message. 
+     * Success reply’s payloads are handled by handleMonitorFacilityResult.
      * @param facilityName
      * @param endDateTime
      * @return
@@ -178,16 +184,22 @@ public class Client {
         return null;
     }
 
+    /** 
+     * Handle the successful reply’s payloads of monitorFacility function, which may contain start_monitor message 
+     * or stop_monitor message or availability of a facility over week.
+     * @param payloads
+     */
     private void handleMonitorFacilityResult(ArrayList<String> payloads) {
-    	if (payloads.get(1).equals(Constant.START_MONITOR)) {
-    		System.out.printf("[%s] Start monitoring facility %s\n", Utils.currentLogFormatTime(), payloads.get(0));
-    		return;
-    	}
-    	if (payloads.get(1).equals(Constant.STOP_MONITOR)) {
-    		System.out.printf("[%s] Stop monitoring facility %s\n", Utils.currentLogFormatTime(), payloads.get(0));
-    		return;
-    	}
-        System.out.printf("[%s] Available slots on facility %s overweek:\n", Utils.currentLogFormatTime(), payloads.get(0));
+        if (payloads.get(1).equals(Constant.START_MONITOR)) {
+            System.out.printf("[%s] Start monitoring facility %s\n", Utils.currentLogFormatTime(), payloads.get(0));
+            return;
+        }
+        if (payloads.get(1).equals(Constant.STOP_MONITOR)) {
+            System.out.printf("[%s] Stop monitoring facility %s\n", Utils.currentLogFormatTime(), payloads.get(0));
+            return;
+        }
+        System.out.printf("[%s] Available slots on facility %s overweek:\n", Utils.currentLogFormatTime(),
+                payloads.get(0));
         payloads.remove(0);
         for (String freeSlotsInDay : payloads) {
             String[] s = freeSlotsInDay.split("\\|");
@@ -201,7 +213,9 @@ public class Client {
     }
 
     /**
-     * 
+     * Cancel the booking with confirmation id confirmationId. 
+     * Return a null String if no error, else return a string error message. 
+     * Success reply’s payloads are handled by handleCancelBookingResult.
      * @param confirmationId
      * @return
      */
@@ -220,7 +234,7 @@ public class Client {
     }
 
     /**
-     * 
+     * Handle the successful reply’s payloads of cancelBooking function, which contains confirmationId.
      * @param payloads
      */
     private void handleCancelBookingResult(ArrayList<String> payloads) {
@@ -228,7 +242,9 @@ public class Client {
     }
 
     /**
-     * 
+     * Get all available facilities over a time range [starTime, endTime] on a selected day. 
+     * Return a null String if no error, else return a string error message. 
+     * Success reply’s payloads are handled by handleGetAllAvailableFacilities.
      * @param day
      * @return
      */
@@ -253,7 +269,8 @@ public class Client {
     }
 
     /**
-     * 
+     * Handle successful reply of getAllAvailableFacilitiesInTimeRange function, which contains 
+     * availability of all facilities in the desired time range and day.
      * @param payloads
      */
     private void handleGetAllAvailableFacilities(ArrayList<String> payloads) {
@@ -299,8 +316,10 @@ public class Client {
     }
 
     /**
-     * Create a socket and send request to remote server, then wait to receive the reply and unmarshal it to get the payloads.
-     * Return an OperationResult with two field error and payloads. If error is not null, payloads is null.
+     * Create a socket and end request to server and wait for reply. Reply can be multiple reply 
+     * from server for monitor request or a single reply for other requests. 
+     * Return a null String if no error sending request and receiving reply, else return 
+     * a string error message. Payloads of successful reply are handled via callback.
      * @param request the request to be send to sever
      * @param multipleReply the option to wait for multiple reply from server
      * @param f the callback function to handle replies from server

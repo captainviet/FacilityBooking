@@ -9,11 +9,30 @@ public class Network {
     static int counter = 0;
     static boolean isReliable = false;
 
-    public static boolean attemptingTransmission() {
-        counter = (counter + 1) % LOSS_RATE;
-        if (!isReliable && counter == 0) {
-            return false;
+    private enum Host {
+        Server(0),
+        Client(1);
+
+        int code;
+
+        private Host(int code) {
+            this.code = code;
         }
-        return true;
+    }
+
+    public static boolean serverPacketLost() {
+        return isPacketLost(Host.Server);
+    }
+
+    public static boolean clientPacketLost() {
+        return isPacketLost(Host.Client);
+    }
+
+    private static boolean isPacketLost(Host host) {
+        counter = (counter + 1) % LOSS_RATE;
+        if (!isReliable && counter == host.code) {
+            return true;
+        }
+        return false;
     }
 }
