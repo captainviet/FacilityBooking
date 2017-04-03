@@ -43,19 +43,19 @@ public class ClientSocket {
 
     public void sendRequest(Request request) {
         clearError();
-        if (!Network.attemptingTransmission()) {
-			return;
-		}
+        if (Network.clientPacketLost()) {
+            return;
+        }
         byte[] data = Request.marshal(request);
-		DatagramPacket packet = new DatagramPacket(data, data.length, serverHost, serverPort);
-    	try {
-    		if (Constant.DEBUG) {
-    			System.out.println("\n"  + Utils.currentLogFormatTime() + "\t" + new String(packet.getData()));
-    		}
-    		socket.send(packet);
-    	} catch (IOException ioe) {
-    		error = ioe.getStackTrace().toString();
-    	}
+        DatagramPacket packet = new DatagramPacket(data, data.length, serverHost, serverPort);
+        try {
+            if (Constant.DEBUG) {
+                System.out.println("\n" + Utils.currentLogFormatTime() + "\t" + new String(packet.getData()));
+            }
+            socket.send(packet);
+        } catch (IOException ioe) {
+            error = ioe.getStackTrace().toString();
+        }
     }
 
     public byte[] receiveReply() {
@@ -65,7 +65,7 @@ public class ClientSocket {
         try {
             socket.receive(packet);
             if (Constant.DEBUG) {
-            	System.out.println("Received reply.");
+                System.out.println("Received reply.");
             }
         } catch (IOException e) {
             if (e instanceof SocketTimeoutException) {
@@ -75,7 +75,7 @@ public class ClientSocket {
             }
         }
         if (Constant.DEBUG && error == null) {
-        	System.out.println(new String(packet.getData()));
+            System.out.println(new String(packet.getData()));
         }
         return packet.getData();
     }

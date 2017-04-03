@@ -51,6 +51,13 @@ public class Server {
         System.out.printf("Server listening on host: %s, port: %s\n", serverHost.getHostName(), serverPort);
     }
 
+    /**
+     * Receive request via current serverSocket socket that bound to. 
+     * Unmarshall byte array data from serverSocket receiveRequest method to a request. 
+     * Do filtering if at most once invocation semantic is chosen, handle request with handleRequest. 
+     * Return null if no error receiving and handling request, else return error message.
+     * @return
+     */
     public String receiveAndProcessRequest() {
         String error = null;
         byte[] data = serverSocket.receiveRequest();
@@ -77,6 +84,13 @@ public class Server {
         return error;
     }
 
+    /**
+     * Handle Request request with specific handle method respect to request type. 
+     * Return null if no error handling and processing request, else return error message.
+     * @param request
+     * @param requestKey
+     * @return
+     */
     private String handleRequest(Request request, String requestKey) {
         switch (request.getType()) {
         case Request.QUERY:
@@ -101,6 +115,16 @@ public class Server {
                 Utils.currentLogFormatTime(), requestId, requestType, clientIp, clientPort);
     }
 
+    /**
+     * Process the request type GET_ALL (client function: getAllAvailableFacilitiesInTimeRange), 
+     * call QueryService’s getAllAvailableFacilities to retrieve availability of all facilities over selection of day and time range. 
+     * Construct a reply and send back result or error to client. 
+     * Return null if no error sending reply, else return error message. 
+     * Store reply in history map with key requestKey if invocation semantic is at most once.
+     * @param request
+     * @param requestKey
+     * @return
+     */
     private String processGetAllAvailableInTimeRangeRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
@@ -136,6 +160,16 @@ public class Server {
 
     }
 
+    /**
+     * Process the request type CANCEL (client function: cancelBooking), call QueryService’s cancelBookedConfirmation 
+     * to cancel a booking with given confirmationId on a facility. 
+     * Construct a reply and send back result or error to client. 
+     * Return null if no error sending reply, else return error message. 
+     * Store reply in history map with key requestKey if invocation semantic is at most once.
+     * @param request
+     * @param requestKey
+     * @return
+     */
     private String processCancelBookingRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
@@ -171,6 +205,16 @@ public class Server {
         return null;
     }
 
+    /**
+     * Process the request type MONITOR (client function: monitorFacility), call MonitoringService’s registerClient 
+     * to register a ClientMonitor represent the client’s monitoring on a facility. 
+     * Construct a reply and send back result or error to client. 
+     * Return null if no error sending reply, else return error message. 
+     * Store reply in history map with key requestKey if invocation semantic is at most once.
+     * @param request
+     * @param requestKey
+     * @return
+     */
     private String processMonitorRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
@@ -200,6 +244,16 @@ public class Server {
         return null;
     }
 
+    /**
+     * Process the request type EDIT (client function: editBooking), call QueryService’s editBookedConfirmation 
+     * to change a book on a facility by a time offset. 
+     * Construct a reply and send back result or error to client. 
+     * Return null if no error sending reply, else return error message. 
+     * Store reply in history map with key requestKey if invocation semantic is at most once.
+     * @param request
+     * @param requestKey
+     * @return
+     */
     private String processEditBookingRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
@@ -238,6 +292,16 @@ public class Server {
         return null;
     }
 
+    /**
+     * Process the request type BOOK (client function: bookFacility), call QueryService’s getConfirmationID to book a facility 
+     * over a period of time. 
+     * Construct a reply and send back result or error to client. 
+     * Return null if no error sending reply, else return error message. 
+     * Store reply in history map with key requestKey if invocation semantic is at most once.
+     * @param request
+     * @param requestKey
+     * @return
+     */
     private String processBookingRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
@@ -274,6 +338,16 @@ public class Server {
         return null;
     }
 
+    /**
+     * Process the request type QUERY (client function: queryAvailability), call QueryService’s getAvailableFacility 
+     * to retrieve availability of a facility over selection of day, calling multiple times for multiple days. 
+     * Construct a reply and send back result or error to client. 
+     * Return null if no error sending reply, else return error message. 
+     * Store reply in history map with key requestKey if invocation semantic is at most once.
+     * @param request
+     * @param requestKey
+     * @return
+     */
     private String processQueryAvailabilityRequest(Request request, String requestKey) {
         List<String> result = new ArrayList<>();
         boolean hasError = false;
@@ -323,7 +397,7 @@ public class Server {
     }
 
     private String sendReply(Reply reply) {
-        if (!Network.attemptingTransmission()) {
+        if (Network.serverPacketLost()) {
             if (Constant.DEBUG) {
                 System.out.println("Reply Loss!");
             }
